@@ -1,0 +1,1 @@
+export * from "./in-game-waiting-room.component";
