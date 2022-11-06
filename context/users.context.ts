@@ -1,11 +1,26 @@
-import { createStateContext } from "react-use";
+import { createReducerContext } from "react-use";
+import { updateState } from "./context.utils";
 
 export type User = {
-  user_id: string;
+  id: string;
   name: string;
-  is_leader: boolean;
-}
+  leader: boolean;
+};
 
-const [useUsers, UsersProvider] = createStateContext<User[]>([]);
+const userStateReducer = (state: any, action: any) => {
+  switch (action.type) {
+    case "CURRENT_USER":
+      return updateState("user", action.value, state);
+    case "USERS":
+      return updateState("users", action.value, state);
+    default:
+      return state;
+  }
+};
 
-export { useUsers, UsersProvider };
+const [useUserState, UserStateProvider] = createReducerContext(
+  userStateReducer,
+  {}
+);
+
+export { useUserState, UserStateProvider };

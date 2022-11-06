@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import { useForm } from 'react-hook-form';
-import { supabase } from "../../client/supabase-client";
-import { useCreateUser } from "../../hooks/create-game/create-user.hook";
+import { v4 as uuidv4 } from "uuid";
+import { useUserState } from "../../context";
+import { useGameState } from "../../context/game.context";
 import { StateContext } from "../../pages/state-machine";
-import { useReducerContext } from "../../context/game.context";
 
 type FormData = {
   roomCode: string;
@@ -14,9 +14,10 @@ export const JoinGame: React.FC<{
   context: StateContext;
   send: (event: any) => void;
 }> = (props) => {
-  const [, dispatch] = useReducerContext();
+  const [, setGameState] = useGameState();
+  const [, setUserState] = useUserState();
 
-  const { formState: { errors }, handleSubmit, register } = useForm<FormData>({
+  const { handleSubmit, register } = useForm<FormData>({
     mode: 'onSubmit',
     defaultValues: {
       roomCode: props.context.roomCode,
@@ -24,29 +25,12 @@ export const JoinGame: React.FC<{
     }
   });
 
-  const createUser = useCreateUser();
-
   const onSubmitHanlder = useCallback(async (formData: FormData) => {
-    dispatch({ type: "SET_ROOM_CODE", value: formData.roomCode })
-
-    try {
-      const newUser = await createUser(formData.user, formData.roomCode)
-      const room = await supabase
-        .from("npat_rooms")
-        .select()
-        .eq("room_code", formData.roomCode)
-        .limit(1)
-        .single()
-
-      console.log(room.data)
-
-      dispatch({ type: "SET_CATEGORIES", value: room.data.categories });
-      dispatch({ type: "CURRENT_USER", value: newUser })
-      props.send("READY")
-    } catch (error) {
-
-    }
-  }, [createUser, dispatch, props])
+    setGameState({ type: "ROOM_CODE", value: formData.roomCode })
+    const newUser = { id: uuidv4(), name: formData.user, leader: false }
+    setUserState({ type: "CURRENT_USER", value: newUser })
+    props.send("READY")
+  }, [props, setGameState, setUserState])
 
   return (
     <div>

@@ -1,8 +1,10 @@
 import { useMachine } from '@xstate/react';
 import type { NextPage } from 'next';
-import { useSubscribeToRoom } from '../hooks/subscribe-to-room.hook';
-import { useUserManagement } from '../hooks/user-management.hook';
+import { Game } from '../components/game';
+import { GameStateProvider, UserStateProvider } from '../context';
 import { getStateMeta, stateMachine } from './state-machine';
+
+const gameSteps = ["wait", "playing", "score"]
 
 const Home: NextPage<{ code: string }> = ({ code }) => {
   const [state, send] = useMachine(stateMachine, {
@@ -13,29 +15,52 @@ const Home: NextPage<{ code: string }> = ({ code }) => {
 
   const { Component } = getStateMeta(state);
 
-  useSubscribeToRoom()
-  useUserManagement()
-
   return (
-    <div>
-      {state.value === "home" && (
-        <>
-          <button onClick={() => send({ type: 'INSTRUCTIONS' })}>
-            Instructions
-          </button>
-          <button onClick={() => send({ type: 'CREATE' })}>
-            Create Game
-          </button>
-          <button onClick={() => send({ type: 'JOIN' })}>
-            Join
-          </button>
-        </>
-      )}
-      {Component && (
-        <Component context={state.context} send={send} />
-      )}
-    </div>
+    <UserStateProvider>
+      <GameStateProvider initialState={{ roomCode: code }}>
+        <Game send={send}>
+          <div>
+            {state.value === "home" && (
+              <>
+                <button onClick={() => send({ type: 'INSTRUCTIONS' })}>
+                  Instructions
+                </button>
+                <button onClick={() => send({ type: 'CREATE' })}>
+                  Create Game
+                </button>
+                <button onClick={() => send({ type: 'JOIN' })}>
+                  Join
+                </button>
+              </>
+            )}
+          </div>
 
+          {Component && <Component context={state.context} send={send} />}
+        </Game>
+        {/* <div>
+          {state.value === "home" ? (
+            <>
+              <button onClick={() => send({ type: 'INSTRUCTIONS' })}>
+                Instructions
+              </button>
+              <button onClick={() => send({ type: 'CREATE' })}>
+                Create Game
+              </button>
+              <button onClick={() => send({ type: 'JOIN' })}>
+                Join
+              </button>
+            </>
+          ) : gameSteps.includes(state.value.toString()) ? (
+            <Game send={send}>
+              <Component context={state.context} send={send} />
+            </Game>
+
+          ) : (
+            <Component context={state.context} send={send} />
+          )}
+        </div> */}
+      </GameStateProvider>
+    </UserStateProvider>
   )
 }
 

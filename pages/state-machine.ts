@@ -1,10 +1,10 @@
 import { AnyState, assign, createMachine } from "xstate";
 import { CreateGame } from "../components/create-game";
-import { Game } from "../components/game";
-import { InGameWaitingRoom } from "../components/in-game-waiting-room";
 import { InputList } from "../components/input-list";
 import { Instructions } from "../components/instructions";
 import { JoinGame } from "../components/join-game";
+import { Score } from "../components/score";
+import { ScoreReview } from "../components/score-review";
 import { Scoreboard } from "../components/scoreboard";
 import { WaitingRoom } from "../components/waiting-room";
 import { DEFAULT_MAX_ROUNDS } from "../constants";
@@ -91,9 +91,6 @@ export const stateMachine = createMachine<StateContext>(
             on: {
               NEXT: {
                 target: "score",
-                actions: {
-                  type: "incrementRounds",
-                },
               },
             },
             meta: {
@@ -106,10 +103,15 @@ export const stateMachine = createMachine<StateContext>(
               cond: "isAllRoundsCompleted",
             },
             on: {
-              NEXT: { target: "wait" },
+              NEXT: {
+                target: "wait",
+                actions: {
+                  type: "incrementRounds",
+                },
+              },
             },
             meta: {
-              Component: Game,
+              Component: Score,
             },
           },
           wait: {
@@ -117,7 +119,7 @@ export const stateMachine = createMachine<StateContext>(
               NEXT: { target: "playing" },
             },
             meta: {
-              Component: InGameWaitingRoom,
+              Component: ScoreReview,
             },
           },
           completed: {

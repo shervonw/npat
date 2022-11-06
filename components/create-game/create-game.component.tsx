@@ -1,9 +1,12 @@
 import React, { useCallback } from "react";
 import { useForm } from 'react-hook-form';
+import { v4 as uuidv4 } from "uuid";
 import { CATEGORIES, DEFAULT_CATEGORIES, DEFAULT_MAX_ROUNDS, ROUND_SELECTIONS } from "../../constants";
-import { useCreateGame } from "../../hooks/create-game/create-game.hook";
-import { useReducerContext } from "../../context/game.context";
+import { useUserState } from "../../context";
+import { useGameState } from "../../context/game.context";
 import { generateRoomName } from "./create-game.utils";
+
+const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'Y', 'Z']
 
 type FormData = {
   categories: Array<string>;
@@ -15,7 +18,8 @@ export const CreateGame: React.FC<{
   context: any;
   send: (event: any) => void;
 }> = (props) => {
-  const [, dispatch] = useReducerContext();
+  const [, setGameState] = useGameState();
+  const [, setUserState] = useUserState();
 
   const { handleSubmit, register } = useForm<FormData>({
     mode: 'onSubmit',
@@ -25,25 +29,24 @@ export const CreateGame: React.FC<{
     }
   });
 
-  const createGame = useCreateGame()
-
   const onSubmitHanlder = useCallback(async (formData: FormData) => {
     try {
       const { categories, rounds, user } = formData
-      const roomCode = generateRoomName()
+      const newUser = { id: uuidv4(), name: user, leader: true }
 
-      const newUser = await createGame(roomCode, categories, user)
+      setUserState({ type: "CURRENT_USER", value: newUser })
 
-      dispatch({ type: "CURRENT_USER", value: newUser })
-      dispatch({ type: "SET_CATEGORIES", value: categories });
-      dispatch({ type: "SET_ROOM_CODE", value: roomCode });
+      setGameState({ type: "CATEGORIES", value: categories });
+      setGameState({ type: "POSSIBLE_ALPHABET", value: alphabet })
+      setGameState({ type: "ROOM_CODE", value: generateRoomName() });
+      setGameState({ type: "ROUNDS", value: parseInt(rounds) });
 
       props.send({ type: "UPDATE_MAX_ROUNDS", value: parseInt(rounds) })
       props.send("READY")
     } catch (error) {
       console.log({ error })
     }
-  }, [createGame, dispatch, props]);
+  }, [setGameState, props, setUserState]);
 
   return (
     <div>
