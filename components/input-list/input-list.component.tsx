@@ -11,15 +11,15 @@ export const InputList: React.FC<{
   context: any;
   send: (event: any) => void;
 }> = (props) => {
-  const [channel, setChannel] = useState<RealtimeChannel>();
+  const [roundChannel, setRoundChannel] = useState<RealtimeChannel>();
   const { createBroadcastChannel } = useCreateChannel();
   const [gameState, setGameState] = useGameState();
   const [userState] = useUserState();
-  const delay = useDelay();
   const { seconds, startTimer } = useTimer();
   const [timerValue, setTimerValue] = useState(seconds);
-  const { categories, currentLetter } = gameState;
+  const delay = useDelay();
 
+  const { categories, currentLetter } = gameState;
   const { user } = userState;
 
   const { handleSubmit, register, getValues } = useForm<FormData>({
@@ -33,29 +33,26 @@ export const InputList: React.FC<{
   );
 
   useEffectOnce(() => {
-    const newChannel = createBroadcastChannel("inputListRound");
+    const newRoundChannel = createBroadcastChannel("round");
 
-    setChannel(newChannel);
+    setRoundChannel(newRoundChannel);
 
-    newChannel.on("broadcast", { event: "submit" }, () => {
-      setGameState({
-        type: "RESPONSES",
-        value: { round: props.context.round, responses: getValues() },
-      });
+    newRoundChannel.on("broadcast", { event: "submit" }, ({ payload }) => {
+      if (payload.seconds >= 0 && !user.leader) {
+        setTimerValue(payload.seconds);
+      }
 
-      props.send("NEXT");
+      if (payload.submit || payload.seconds === 0) {
+        setGameState({
+          type: "RESPONSES",
+          value: { round: props.context.round, responses: getValues() },
+        });
+
+        props.send("NEXT");
+      }
     });
 
-    newChannel.on("broadcast", { event: "timer" }, (payload) => {
-      setTimerValue(payload.payload);
-    });
-
-    newChannel.subscribe();
-
-    return () => {
-      newChannel.untrack();
-      newChannel.unsubscribe();
-    };
+    newRoundChannel.subscribe();
   });
 
   const onSubmitHanlder = useCallback(
@@ -67,15 +64,18 @@ export const InputList: React.FC<{
 
       await delay();
 
-      channel?.send({
+      roundChannel?.send({
         type: "broadcast",
         event: "submit",
-        payload: true,
+        payload: {
+          seconds: 0,
+          submit: true,
+        },
       });
 
       props.send({ type: "NEXT" });
     },
-    [channel, delay, props, setGameState]
+    [delay, roundChannel, props, setGameState]
   );
 
   useEffectOnce(() => {
@@ -83,19 +83,21 @@ export const InputList: React.FC<{
   });
 
   useEffect(() => {
-    if (channel && user.leader) {
-      channel.send({
-        type: "broadcast",
-        event: "timer",
-        payload: seconds,
-      });
-
+    if (roundChannel && user.leader) {
       if (seconds === 0) {
         onSubmitHanlder(getValues());
+      } else {
+        roundChannel.send({
+          type: "broadcast",
+          event: "submit",
+          payload: {
+            seconds,
+          },
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel, seconds]);
+  }, [roundChannel, seconds]);
 
   return (
     <div>

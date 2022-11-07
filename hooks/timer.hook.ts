@@ -19,7 +19,9 @@ export const useTimer = () => {
 
   useInterval(
     () => {
-      setSeconds(seconds - 1);
+      if (seconds > 0) {
+        setSeconds(seconds - 1);
+      }
     },
     isRunning ? DELAY_VALUE : null
   );

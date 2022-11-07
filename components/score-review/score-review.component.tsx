@@ -1,12 +1,12 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
-import { equals, pluck, pipe, prop, sortBy } from "ramda";
+import { equals } from "ramda";
 import React, { useCallback, useMemo, useState } from "react";
 import { useEffectOnce } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
 import { useGetLetter } from "../../hooks/get-letter.hook";
-import { calculateTotalScore, getUserIds } from "../../utils";
+import { calculateTotalScore, getUserIds, sortByScore } from "../../utils";
 
 export const ScoreReview: React.FC<{
   context: any;
@@ -24,10 +24,12 @@ export const ScoreReview: React.FC<{
 
   const usersWithScore = useMemo(
     () =>
-      usersInWaitingRoom.map((user) => ({
-        ...user,
-        score: calculateTotalScore(user, gameState.allScores),
-      })),
+      sortByScore(
+        usersInWaitingRoom.map((user) => ({
+          ...user,
+          score: calculateTotalScore(user, gameState.allScores),
+        }))
+      ),
     [gameState.allScores, usersInWaitingRoom]
   );
 
@@ -72,6 +74,7 @@ export const ScoreReview: React.FC<{
     await delay();
 
     props.send("NEXT");
+
     channel?.send({
       type: "broadcast",
       event: "start",

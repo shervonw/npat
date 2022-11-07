@@ -1,4 +1,14 @@
-import { keys, map, pipe, pluck, prop, reduce, sortBy, values } from "ramda";
+import {
+  keys,
+  map,
+  pipe,
+  pluck,
+  prop,
+  reduce,
+  sort,
+  sortBy,
+  values
+} from "ramda";
 
 export const getRandomInt = (max: number): number => {
   return Math.floor(Math.random() * max);
@@ -22,10 +32,14 @@ export const calculateTotalScore = (
     reduce<any, any>(
       (totalScore: number, scores: any) => totalScore + aggregateScore(scores),
       0
-    ),
-    sortBy(prop("score"))
+    )
   )(userScores);
 };
+
+export const sortByScore = (list: any[]) =>
+  sort((a, b) => {
+    return b - a;
+  }, list);
 
 export const getUserIds = (users: any) =>
   pipe<any[], any[], string[]>(sortBy(prop("id")), pluck("id"))(users);
