@@ -1,0 +1,13 @@
+.container {
+  padding-top: 7rem;
+}
+
+.heading {
+  text-align: center;
+  margin: 0;
+  padding-bottom: 3rem;
+}
+
+.buttonList > button {
+  margin: 0 auto 1rem;
+}
