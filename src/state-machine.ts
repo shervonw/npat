@@ -1,13 +1,13 @@
 import { AnyState, assign, createMachine } from "xstate";
-import { CreateGame } from "../components/create-game";
-import { InputList } from "../components/input-list";
-import { Instructions } from "../components/instructions";
-import { JoinGame } from "../components/join-game";
-import { Score } from "../components/score";
-import { ScoreReview } from "../components/score-review";
-import { Scoreboard } from "../components/scoreboard";
-import { WaitingRoom } from "../components/waiting-room";
-import { DEFAULT_MAX_ROUNDS } from "../constants";
+import { CreateGame } from "./components/create-game";
+import { InputList } from "./components/input-list";
+import { Instructions } from "./components/instructions";
+import { JoinGame } from "./components/join-game";
+import { Score } from "./components/score";
+import { ScoreReview } from "./components/score-review";
+import { Scoreboard } from "./components/scoreboard";
+import { WaitingRoom } from "./components/waiting-room";
+import { DEFAULT_MAX_ROUNDS } from "./constants";
 
 export interface StateContext {
   maxRounds: number;

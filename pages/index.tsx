@@ -1,8 +1,8 @@
 import { useMachine } from '@xstate/react';
 import type { NextPage } from 'next';
-import { Game } from '../components/game';
-import { GameStateProvider, UserStateProvider } from '../context';
-import { getStateMeta, stateMachine } from './state-machine';
+import { Game } from '../src/components/game';
+import { GameStateProvider, UserStateProvider } from '../src/context';
+import { getStateMeta, stateMachine } from '../src/state-machine';
 
 const Home: NextPage<{ code: string }> = ({ code }) => {
   const [state, send] = useMachine(stateMachine, {
