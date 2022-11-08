@@ -9,6 +9,7 @@ import {
   sortBy,
   values
 } from "ramda";
+import { EMOJIS } from "../constants";
 
 export const getRandomInt = (max: number): number => {
   return Math.floor(Math.random() * max);
@@ -43,3 +44,10 @@ export const sortByScore = (list: any[]) =>
 
 export const getUserIds = (users: any) =>
   pipe<any[], any[], string[]>(sortBy(prop("id")), pluck("id"))(users);
+
+export const getEmoji = (excludeList: any[] = []) => {
+  const uniqueEmojiList = EMOJIS.filter((emoji) => !excludeList.includes(emoji))  
+  const randomIndex = getRandomInt(uniqueEmojiList.length - 1);
+
+  return uniqueEmojiList[randomIndex];
+}

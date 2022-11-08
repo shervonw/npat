@@ -16,7 +16,7 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
 
   return (
     <UserStateProvider>
-      <GameStateProvider initialState={{ roomCode: code }}>
+      <GameStateProvider>
         <Game send={send}>
           {state.value === "home" && (
             <Home send={send} />

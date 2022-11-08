@@ -1,0 +1,44 @@
+.heading,
+.roomCodeContainer {
+  text-align: center;
+}
+
+.roomCodeContainer {
+  padding: 2rem 0;
+}
+
+.roomCodeContainer p {
+  margin: 0;
+}
+
+.roomCode {
+  color: royalblue;
+  font-size: 1.125rem;
+  font-weight: 600;
+  flex-grow: 1;
+}
+
+.roomCodeContent {
+  display: flex;
+  align-items: center;
+  border: dashed;
+  margin: 1rem 0;
+}
+
+.roomCodeContent > button {
+  min-width: auto;
+  font-size: 1rem;
+}
+
+.userListContainer {
+  margin-bottom: 2rem;
+}
+
+.buttonWrapper > button,
+.buttonWrapper > p {
+  margin: 0 auto 1rem;
+}
+
+.buttonWrapper > p {
+  width: fit-content;
+}

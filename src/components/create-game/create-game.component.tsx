@@ -9,6 +9,7 @@ import {
 } from "../../constants";
 import { useUserState } from "../../context";
 import { useGameState } from "../../context/game.context";
+import { getEmoji } from "../../utils";
 import { ALPHABET } from "./create-game.constants";
 import styles from "./create-game.module.css";
 import { generateRoomName } from "./create-game.utils";
@@ -37,7 +38,12 @@ export const CreateGame: React.FC<{
   const onSubmitHanlder = useCallback(
     async (formData: FormData) => {
       const { categories, rounds, user } = formData;
-      const newUser = { id: uuidv4(), name: user, leader: true };
+      const newUser = {
+        id: uuidv4(),
+        name: user,
+        leader: true,
+        emoji: getEmoji(),
+      };
 
       setUserState({ type: "CURRENT_USER", value: newUser });
 
@@ -53,56 +59,50 @@ export const CreateGame: React.FC<{
   );
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.heading}>Create Game</h1>
+    <form onSubmit={handleSubmit(onSubmitHanlder)}>
+      <div className={styles.inputContainer}>
+        <label>Your Name:</label>
+        <input {...register("user", { required: true, maxLength: 20 })} type="text" />
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmitHanlder)}>
-        <div className={styles.nameInputContainer}>
-          <label>Your Name:</label>
-          <input
-            {...register("user", { required: true, maxLength: 20 })}
-            type="text"
-          />
+      <div className={styles.optionsContainer}>
+        <h3>Select number of rounds:</h3>
+        <div className={styles.roundSelectionList}>
+          {ROUND_SELECTIONS.map((round, index) => (
+            <div key={index}>
+              <input
+                type="radio"
+                id={round.toString()}
+                value={round}
+                {...register("rounds")}
+              />
+              <label htmlFor={round.toString()}>{round.toString()}</label>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className={styles.optionsContainer}>
-          <h3>Select number of rounds:</h3>
-          <div className={styles.roundSelectionList}>
-            {ROUND_SELECTIONS.map((round, index) => (
-              <div key={index}>
-                <input
-                  type="radio"
-                  id={round.toString()}
-                  value={round}
-                  {...register("rounds")}
-                />
-                <label htmlFor={round.toString()}>{round.toString()}</label>
-              </div>
-            ))}
-          </div>
+      <div className={styles.optionsContainer}>
+        <h3>Select categories:</h3>
+        <div className={styles.categoriesList}>
+          {CATEGORIES.map((category, index) => (
+            <div key={index}>
+              <input
+                type="checkbox"
+                id={category.id}
+                value={category.value}
+                {...register("categories")}
+              />
+              <label htmlFor={category.id}>{category.value}</label>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className={styles.optionsContainer}>
-          <h3>Select categories:</h3>
-          <div className={styles.categoriesList}>
-            {CATEGORIES.map((category, index) => (
-              <div key={index}>
-                <input
-                  type="checkbox"
-                  id={category.id}
-                  value={category.value}
-                  {...register("categories")}
-                />
-                <label htmlFor={category.id}>{category.value}</label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.buttonWrapper}>
-          <button type="submit">Ready</button>
-        </div>
-      </form>
-    </div>
+      <div className={styles.buttonWrapper}>
+        <button type="submit">Create Game</button>
+        <button onClick={() => props.send("BACK")}>Cancel</button>
+      </div>
+    </form>
   );
 };

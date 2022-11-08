@@ -1,0 +1,29 @@
+.userList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.userList > div {
+  position: relative;
+  max-width: 7rem;
+  min-width: 3rem;
+  text-align: center;
+}
+
+.emoji {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.userList > div > h4 {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+.leaderIndicator {
+  position: absolute;
+  left: -0.5rem;
+  bottom: 0.0625rem;
+  font-size: 0.8rem;
+}

@@ -12,7 +12,7 @@ export const Instructions: React.FC<{
         chooses the word categories. The game is player over a couple of rounds.
         At the beginning of every round, players get a new alphabet. Your job is
         to think of words that begin with that letter and fit the categories in
-        the game. Each game round is timed at 60 seconds, but the game alsos end
+        the game. Each game round is timed at 60 seconds, but the game also end
         as soon as the first person submits their response. Think fast!
       </p>
 
@@ -23,9 +23,7 @@ export const Instructions: React.FC<{
         rounds you would like to play as well as any additional categories you
         would want to include besides, &quot;Name&quot;, &quot;Place&quot;,
         &quot;Animal&quot; and &quot;Thing&quot;. You can also define
-        &quot;scoring mechanics&quot;. Select &quot;Score Yourself&quot; if you
-        want people to score themselves, or select &quot;Score Each Other&quot;
-        to score your friends. Once you have created the game, you will get a
+        &quot;scoring mechanics&quot;. Once you have created the game, you will get a
         &quot;Game Code&quot;. Create the room and send the Game Code to your
         friends who will be able to use it join the room. Once your friends have
         joined, the creator will be able to start the game!

@@ -1,5 +1,5 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAsync } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
@@ -21,8 +21,10 @@ export const Game: React.FC<{
 
   const { createPresenceChannel } = useCreateChannel();
 
+  const canInitialize = useMemo(() => gameState.roomCode && user, [gameState.roomCode, user])
+
   useEffect(() => {
-    if (gameState.roomCode) {
+    if (canInitialize) {
       const usersChannel = createPresenceChannel("users");
 
       usersChannel.on("presence", { event: "join" }, (presence) => {
@@ -52,16 +54,21 @@ export const Game: React.FC<{
               leader: newLeader.id === user.id,
             })),
           });
+        } else {
+          setUserState({
+            type: "USERS",
+            value: presence.currentPresences,
+          });
         }
       });
 
       usersChannel.subscribe().track(user);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState.roomCode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canInitialize]);
 
   useAsync(async () => {
-    if (gameState.roomCode) {
+    if (canInitialize) {
       if (!gameStateChannel) {
         await delay();
       }
@@ -97,7 +104,7 @@ export const Game: React.FC<{
       newGameStateChannel.subscribe();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState.roomCode]);
+  }, [canInitialize]);
 
   useEffect(() => {
     if (gameStateChannel && user.leader) {
@@ -113,7 +120,7 @@ export const Game: React.FC<{
   ]);
 
   useAsync(async () => {
-    if (gameState.roomCode) {
+    if (canInitialize) {
       if (!responsesChannel) {
         await delay(750);
       }
@@ -141,7 +148,7 @@ export const Game: React.FC<{
       newResponsesChannel.subscribe();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState.roomCode]);
+  }, [canInitialize]);
 
   useEffect(() => {
     if (responsesChannel && gameState.responses) {
@@ -150,7 +157,7 @@ export const Game: React.FC<{
   }, [responsesChannel, gameState.responses]);
 
   useAsync(async () => {
-    if (gameState.roomCode) {
+    if (canInitialize) {
       if (!scoringChannel) {
         await delay(1000);
       }
@@ -183,7 +190,7 @@ export const Game: React.FC<{
       newScoringChannel.subscribe();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState.roomCode]);
+  }, [canInitialize]);
 
   useEffect(() => {
     if (scoringChannel && gameState.scores) {
