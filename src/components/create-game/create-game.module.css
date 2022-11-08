@@ -1,0 +1,67 @@
+.container {
+  margin: 0;
+}
+
+.heading {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.nameInputContainer {
+  display: flex;
+  align-items: center;
+}
+
+.nameInputContainer > label {
+  flex-basis: 150px;
+}
+
+.nameInputContainer > input {
+  flex-grow: 1;
+  background-color: transparent;
+  border-radius: 0.25rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  height: 2rem;
+  width: 100%;
+  padding: 1.25rem 1rem;
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 0;
+}
+
+.optionsContainer > h3 {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.roundSelectionList {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.categoriesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 0.5rem;
+  justify-content: center;
+}
+
+.categoriesList > div {
+  width: 9.375rem;
+}
+
+.categoriesList > div > label {
+  font-weight: 500;
+  padding-left: 0.5rem;
+}
+
+.buttonWrapper > button {
+  margin: auto;
+}
