@@ -1,14 +1,15 @@
-import { useMachine } from '@xstate/react';
-import type { NextPage } from 'next';
-import { Game } from '../src/components/game';
-import { GameStateProvider, UserStateProvider } from '../src/context';
-import { getStateMeta, stateMachine } from '../src/state-machine';
+import { useMachine } from "@xstate/react";
+import type { NextPage } from "next";
+import { Game } from "../src/components/game";
+import { Home } from "../src/components/home";
+import { GameStateProvider, UserStateProvider } from "../src/context";
+import { getStateMeta, stateMachine } from "../src/state-machine";
 
-const Home: NextPage<{ code: string }> = ({ code }) => {
+const Index: NextPage<{ code: string }> = ({ code }) => {
   const [state, send] = useMachine(stateMachine, {
     context: {
       roomCode: code,
-    }
+    },
   });
 
   const { Component } = getStateMeta(state);
@@ -17,33 +18,21 @@ const Home: NextPage<{ code: string }> = ({ code }) => {
     <UserStateProvider>
       <GameStateProvider initialState={{ roomCode: code }}>
         <Game send={send}>
-          <div>
-            {state.value === "home" && (
-              <>
-                <button onClick={() => send({ type: 'INSTRUCTIONS' })}>
-                  Instructions
-                </button>
-                <button onClick={() => send({ type: 'CREATE' })}>
-                  Create Game
-                </button>
-                <button onClick={() => send({ type: 'JOIN' })}>
-                  Join
-                </button>
-              </>
-            )}
-          </div>
+          {state.value === "home" && (
+            <Home send={send} />
+          )}
 
           {Component && <Component context={state.context} send={send} />}
         </Game>
       </GameStateProvider>
     </UserStateProvider>
-  )
-}
+  );
+};
 
-Home.getInitialProps = async (context): Promise<{ code: string }> => {
+Index.getInitialProps = async (context): Promise<{ code: string }> => {
   return {
     code: (context.query?.code ?? "") as string,
   };
-}
+};
 
-export default Home
+export default Index;

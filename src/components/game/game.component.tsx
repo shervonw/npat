@@ -4,6 +4,7 @@ import { useAsync } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
+import styles from "./game.module.css"
 
 export const Game: React.FC<{
   children: any;
@@ -190,5 +191,5 @@ export const Game: React.FC<{
     }
   }, [scoringChannel, gameState.scores]);
 
-  return <div>{children}</div>;
+  return <div className={styles.container}>{children}</div>;
 };
