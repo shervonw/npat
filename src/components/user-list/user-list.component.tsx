@@ -11,9 +11,9 @@ export const UserList = ({
         users.map((user, index: number) => (
           <div key={index}>
             <div className={styles.emoji}>{user.emoji}</div>
-            <h4>
+            <p>
               {user.leader && <span>👑</span>} {user.name}
-            </h4>
+            </p>
           </div>
         ))}
     </div>

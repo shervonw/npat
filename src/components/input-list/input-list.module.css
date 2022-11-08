@@ -1,0 +1,30 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.header > p {
+  background-color: royalblue;
+  height: 3.5rem;
+  width: 3.5rem;
+  border-radius: 50%;
+  color: white;
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+}
+
+.headerContent > h2 > span {
+  color: royalblue;
+}
+
+.inputListItem {
+  margin-bottom: 1rem;
+}
+
+.buttonWrapper > button {
+  margin: 0 auto 1rem;
+}

@@ -12,13 +12,14 @@
 }
 
 .emoji {
-  font-size: 1.5rem;
+  font-size: 3rem;
   margin-bottom: 0.5rem;
 }
 
-.userList > div > h4 {
+.userList > div > p {
   margin: 0;
   overflow-wrap: break-word;
+  font-size: 1.125rem;
 }
 
 .leaderIndicator {

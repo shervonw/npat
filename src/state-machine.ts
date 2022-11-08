@@ -30,7 +30,7 @@ export const stateMachine = createMachine<StateContext>(
     context: {
       maxRounds: DEFAULT_MAX_ROUNDS,
       roomCode: "",
-      round: 1,
+      round: 0,
     },
     states: {
       unknown: {
@@ -85,29 +85,41 @@ export const stateMachine = createMachine<StateContext>(
       },
       game: {
         type: "compound",
-        initial: "playing",
+        initial: "check",
         states: {
+          check: {
+            always: [
+              {
+                target: "completed",
+                cond: "isAllRoundsCompleted",
+              },
+              {
+                target: "playing",
+                actions: {
+                  type: "incrementRounds",
+                },
+              },
+            ],
+          },
           playing: {
             on: {
               NEXT: {
                 target: "score",
               },
+              INCREMENT_ROUND: {
+                actions: {
+                  type: "incrementRounds",
+                },
+              }
             },
             meta: {
               Component: InputList,
             },
           },
           score: {
-            always: {
-              target: "completed",
-              cond: "isAllRoundsCompleted",
-            },
             on: {
               NEXT: {
                 target: "wait",
-                actions: {
-                  type: "incrementRounds",
-                },
               },
             },
             meta: {
@@ -116,7 +128,7 @@ export const stateMachine = createMachine<StateContext>(
           },
           wait: {
             on: {
-              NEXT: { target: "playing" },
+              NEXT: { target: "check" },
             },
             meta: {
               Component: ScoreReview,
@@ -150,7 +162,7 @@ export const stateMachine = createMachine<StateContext>(
     },
     guards: {
       checkForRoomCode: (ctx) => !!ctx.roomCode,
-      isAllRoundsCompleted: (ctx) => ctx.round === ctx.maxRounds + 1,
+      isAllRoundsCompleted: (ctx) => ctx.round === ctx.maxRounds,
     },
   }
 );

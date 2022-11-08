@@ -6,12 +6,12 @@ const BUTTON_CONFIG = [
     type: "INSTRUCTIONS",
   },
   {
-    label: "Create Game",
-    type: "CREATE",
-  },
-  {
     label: "Join",
     type: "JOIN",
+  },
+  {
+    label: "Create Game",
+    type: "CREATE",
   },
 ];
 

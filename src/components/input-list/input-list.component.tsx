@@ -1,11 +1,12 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useEffectOnce } from "react-use";
+import { useMount } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
 import { useTimer } from "../../hooks/timer.hook";
+import styles from "./input-list.module.css";
 
 export const InputList: React.FC<{
   context: any;
@@ -19,7 +20,7 @@ export const InputList: React.FC<{
   const [timerValue, setTimerValue] = useState(seconds);
   const delay = useDelay();
 
-  const { categories, currentLetter } = gameState;
+  const { categories, currentLetter, rounds } = gameState;
   const { user } = userState;
 
   const { handleSubmit, register, getValues } = useForm<FormData>({
@@ -32,7 +33,7 @@ export const InputList: React.FC<{
     [seconds, timerValue, user.leader]
   );
 
-  useEffectOnce(() => {
+  useMount(() => {
     const newRoundChannel = createBroadcastChannel("round");
 
     setRoundChannel(newRoundChannel);
@@ -78,7 +79,7 @@ export const InputList: React.FC<{
     [delay, roundChannel, props, setGameState]
   );
 
-  useEffectOnce(() => {
+  useMount(() => {
     startTimer();
   });
 
@@ -101,20 +102,38 @@ export const InputList: React.FC<{
 
   return (
     <div>
-      <p>Current Letter: {currentLetter}</p>
-      <p>Timer: {currentTimerValue}</p>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h2>
+            Round:{" "}
+            <span>
+              #{props.context.round}/{rounds}
+            </span>
+          </h2>
+          <h2>
+            Current Letter: <span>{currentLetter}</span>
+          </h2>
+        </div>
+
+        <p>{currentTimerValue}</p>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmitHanlder)}>
         {categories &&
           categories.map((category: any, index: number) => (
-            <div key={index}>
+            <div key={index} className={styles.inputListItem}>
               <input
                 {...register(category, { maxLength: 30 })}
+                autoFocus={index === 0}
                 placeholder={category}
+                type="text"
               />
             </div>
           ))}
 
-        <button type="submit">Ready</button>
+        <div className={styles.buttonWrapper}>
+          <button type="submit">Submit Response</button>
+        </div>
       </form>
     </div>
   );

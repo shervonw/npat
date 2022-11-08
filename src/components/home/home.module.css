@@ -8,6 +8,11 @@
   padding-bottom: 3rem;
 }
 
+.buttonList > button:first-child {
+  margin-bottom: 3rem;
+}
+
 .buttonList > button {
+  font-size: 1.5rem;
   margin: 0 auto 1rem;
 }
