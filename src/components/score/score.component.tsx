@@ -117,6 +117,7 @@ export const Score: React.FC<{
 
       categories.forEach((category: string) => {
         const similar = similarityCheck(category, playerIdToScore);
+
         if (similar) {
           initialScore[category] = 5;
         } else {
@@ -127,7 +128,7 @@ export const Score: React.FC<{
       setCurrentScore(initialScore);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerIdToScore, scoringPartners]);
+  }, [playerIdToScore, responseList]);
 
   useEffect(() => {
     if (Object.keys(currentScore).length) {

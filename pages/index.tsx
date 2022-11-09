@@ -1,5 +1,7 @@
 import { useMachine } from "@xstate/react";
 import type { NextPage } from "next";
+import NoSleep from 'nosleep.js';
+import { useMount } from "react-use";
 import { Game } from "../src/components/game";
 import { Home } from "../src/components/home";
 import { GameStateProvider, UserStateProvider } from "../src/context";
@@ -14,13 +16,25 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
 
   const { Component } = getStateMeta(state);
 
+  useMount(() => {
+    var noSleep = new NoSleep();
+
+    // Enable wake lock.
+    document.addEventListener(
+      "click",
+      function enableNoSleep() {
+        document.removeEventListener("click", enableNoSleep, false);
+        noSleep.enable();
+      },
+      false
+    );
+  });
+
   return (
     <UserStateProvider>
       <GameStateProvider>
         <Game send={send}>
-          {state.value === "home" && (
-            <Home send={send} />
-          )}
+          {state.value === "home" && <Home send={send} />}
 
           {Component && <Component context={state.context} send={send} />}
         </Game>
