@@ -1,0 +1,14 @@
+.button {
+  background-color: royalblue;
+  color: black;
+  width: 2rem;
+  font-size: 1rem;
+  min-width: auto;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button:disabled {
+  background-color: silver;
+}

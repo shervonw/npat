@@ -1,7 +1,7 @@
 .userList {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .userList > div {
@@ -12,8 +12,15 @@
 }
 
 .emoji {
+  height: 4rem;
   font-size: 3rem;
   margin-bottom: 0.5rem;
+}
+
+.score {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem !important;
 }
 
 .userList > div > p {

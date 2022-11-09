@@ -7,6 +7,8 @@ import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
 import { useGetLetter } from "../../hooks/get-letter.hook";
 import { calculateTotalScore, getUserIds, sortByScore } from "../../utils";
+import { UserList } from "../user-list";
+import styles from "./score-review.module.css"
 
 export const ScoreReview: React.FC<{
   context: any;
@@ -83,19 +85,15 @@ export const ScoreReview: React.FC<{
   }, [channel, delay, getLetter, props]);
 
   return (
-    <div>
-      Waiting For Players
-      {usersWithScore.map(
-        (user: { name: string; score: number }, index: number) => (
-          <div key={index}>
-            <h4>
-              {user.name} - {user.score}
-            </h4>
-          </div>
-        )
-      )}
+    <div className={styles.container}>
+      <h2>Waiting for players to finish scoring</h2>
+      <p>Here are the current scores:</p>
+      <UserList users={usersWithScore} />
+
       {canStartGame && user?.leader && (
+        <div className={styles.buttonWrapper}>
         <button onClick={startGame}>Ready</button>
+        </div>
       )}
     </div>
   );

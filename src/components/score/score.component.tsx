@@ -4,45 +4,9 @@ import { useAsync, useMount } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
-
-const NumberInput = ({
-  category,
-  currentScore,
-  setCurrentScore,
-  value,
-}: {
-  category: string;
-  currentScore: Record<string, number>;
-  setCurrentScore: (score: Record<string, number>) => void;
-  value: number;
-}) => {
-  const [numberValue, setNumberValue] = useState(value);
-  const onMinus = useCallback(() => {
-    setCurrentScore(
-      Object.assign({}, currentScore, { [category]: numberValue - 5 })
-    );
-    if (!(numberValue <= 0)) setNumberValue(numberValue - 5);
-  }, [category, currentScore, numberValue, setCurrentScore]);
-
-  const onPlus = useCallback( () => { 
-    setCurrentScore(
-      Object.assign({}, currentScore, { [category]: numberValue + 5 })
-    );
-    if (!(numberValue >= 10)) setNumberValue(numberValue + 5);
-  }, [category, currentScore, numberValue, setCurrentScore]);
-
-  return (
-    <>
-      <button disabled={numberValue === 0} onClick={onMinus}>
-        -
-      </button>
-      {numberValue}
-      <button disabled={numberValue === 10} onClick={onPlus}>
-        +
-      </button>
-    </>
-  );
-};
+import { NumberInput } from "./number-input";
+import styles from "./score.module.css";
+import { transformReponses } from "./score.utils";
 
 export const Score: React.FC<{
   context: any;
@@ -100,6 +64,17 @@ export const Score: React.FC<{
       return false;
     },
     [allResponses, playerResponses, props.context.round, user.id]
+  );
+
+  const responseList = useMemo(
+    () =>
+      transformReponses(
+        allResponses,
+        props.context.round,
+        playerIdToScore,
+        users
+      ),
+    [allResponses, playerIdToScore, props.context.round, users]
   );
 
   useMount(() => {
@@ -171,38 +146,79 @@ export const Score: React.FC<{
 
   useEffect(() => {
     if (Object.keys(currentScore).length) {
-      setGameState({ type: "SCORES", value: { round: props.context.round, scores: currentScore, userId: playerIdToScore } })
-    }  
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScore])
+      setGameState({
+        type: "SCORES",
+        value: {
+          round: props.context.round,
+          scores: currentScore,
+          userId: playerIdToScore,
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScore]);
 
   return (
-    <div>
-      Score
-      {categories &&
-        categories.map((category: any, index: number) => {
-          const similar = similarityCheck(category);
-          const resp = playerResponses?.[category];
+    <div className={styles.container}>
+      <h2>Time to score!</h2>
+      <div className={styles.legend}>
+        <div className={styles.yellowBox} />
+        <span>- means duplicate answer</span>
+      </div>
+      {responseList.map(({ user, responses }, index) => {
+        const selfScoreCard = user.id === playerIdToScore;
 
-          return (
-            <div key={index}>
-              <span>
-                {category}: {resp || "-"}
-              </span>
-              {resp && (
-                <span>
-                  <NumberInput
-                    category={category}
-                    currentScore={currentScore}
-                    setCurrentScore={setCurrentScore}
-                    value={similar ? 5 : 0}
-                  />
-                </span>
-              )}
+        return (
+          <>
+            <div key={index} className={styles.card}>
+              <h3>
+                {selfScoreCard ? (
+                  <span>
+                    Youre scoring for <span>{user.name}</span>
+                  </span>
+                ) : (
+                  `${user.name}'s responses`
+                )}
+              </h3>
+              <div className={styles.scoreLayout}>
+                {categories &&
+                  categories.map((category: any, index: number) => {
+                    const similar = similarityCheck(category);
+                    const response = responses?.[category];
+
+                    return (
+                      <div key={index} className={styles.scoreListItem}>
+                        <div
+                          className={
+                            similar ? styles.scoreListItemHighlight : ""
+                          }
+                        >
+                          {category}: {response || "-"}
+                        </div>
+                        {response && selfScoreCard && (
+                          <NumberInput
+                            category={category}
+                            currentScore={currentScore}
+                            setCurrentScore={setCurrentScore}
+                            value={similar ? 5 : 0}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
-          );
-        })}
-      <button onClick={() => props.send("NEXT")}>Next Round</button>
+            {index === 0 && (
+              <>
+                <div className={styles.buttonWrapper}>
+                  <button onClick={() => props.send("NEXT")}>Next Round</button>
+                </div>
+                {responseList.length > 1 && <h3>Other responses</h3>}
+              </>
+            )}
+          </>
+        );
+      })}
     </div>
   );
 };
