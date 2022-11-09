@@ -1,6 +1,6 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import React, { useCallback, useState } from "react";
-import { useMount } from "react-use";
+import { useMount, useTimeoutFn } from "react-use";
 import { useGameState, useUserState } from "../../context";
 import { useCreateChannel } from "../../hooks/create-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
@@ -12,12 +12,17 @@ export const WaitingRoom: React.FC<{
   context: any;
   send: (event: any) => void;
 }> = (props) => {
+  const [copyTimeout, setCopyTimeout] = useState<number>(0);
   const [channel, setChannel] = useState<RealtimeChannel>();
   const { createPresenceChannel } = useCreateChannel();
   const [gameState] = useGameState();
   const [userState] = useUserState();
   const getLetter = useGetLetter();
   const delay = useDelay();
+
+  useTimeoutFn(() => {
+    setCopyTimeout(0);
+  }, copyTimeout);
 
   const { user, users } = userState;
   const { roomCode } = gameState;
@@ -64,25 +69,32 @@ export const WaitingRoom: React.FC<{
   const copyRoomCodeToClipboard = useCallback(() => {
     const roomLink = `${window.location.origin}?code=${roomCode}`;
     navigator.clipboard.writeText(roomLink);
+
+    setCopyTimeout(4000);
   }, [roomCode]);
 
   return (
     <div>
-      <h2 className={styles.heading}>Welcome to the Lobby</h2>
+      <h1 className={styles.heading}>Welcome to the Lobby</h1>
 
       <div className={styles.roomCodeContainer}>
         <p>Your room code is:</p>
 
         <div className={styles.roomCodeContent}>
           <p className={styles.roomCode}>{roomCode}</p>
-          <button onClick={copyRoomCodeToClipboard}>Copy Link</button>
+          <button
+            onClick={copyRoomCodeToClipboard}
+            disabled={copyTimeout !== 0}
+          >
+            {copyTimeout !== 0 ? "Copied" : "Copy Link"}
+          </button>
         </div>
 
         <p>Click &quot;Copy Link&quot; button to copy room link to share!</p>
       </div>
 
       <div className={styles.userListContainer}>
-        <h3>Players in the room</h3>
+        <h2>Players in the room</h2>
         <UserList users={users} />
       </div>
 

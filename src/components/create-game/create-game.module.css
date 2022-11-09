@@ -1,3 +1,7 @@
+.container label {
+  font-size: 1.125rem;
+}
+
 .inputContainer {
   display: flex;
   align-items: center;
@@ -15,7 +19,7 @@
   margin: 0 0 2rem;
 }
 
-.optionsContainer > h3 {
+.optionsContainer > h2 {
   margin: 0.75rem 0 0;
   text-align: center;
 }

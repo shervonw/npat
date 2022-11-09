@@ -59,50 +59,55 @@ export const CreateGame: React.FC<{
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmitHanlder)}>
-      <div className={styles.inputContainer}>
-        <label>Your Name:</label>
-        <input {...register("user", { required: true, maxLength: 20 })} type="text" />
-      </div>
-
-      <div className={styles.optionsContainer}>
-        <h3>Select number of rounds:</h3>
-        <div className={styles.roundSelectionList}>
-          {ROUND_SELECTIONS.map((round, index) => (
-            <div key={index}>
-              <input
-                type="radio"
-                id={round.toString()}
-                value={round}
-                {...register("rounds")}
-              />
-              <label htmlFor={round.toString()}>{round.toString()}</label>
-            </div>
-          ))}
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit(onSubmitHanlder)}>
+        <div className={styles.inputContainer}>
+          <label>Your Name:</label>
+          <input
+            {...register("user", { required: true, maxLength: 20 })}
+            type="text"
+          />
         </div>
-      </div>
 
-      <div className={styles.optionsContainer}>
-        <h3>Select categories:</h3>
-        <div className={styles.categoriesList}>
-          {CATEGORIES.map((category, index) => (
-            <div key={index}>
-              <input
-                type="checkbox"
-                id={category.id}
-                value={category.value}
-                {...register("categories")}
-              />
-              <label htmlFor={category.id}>{category.value}</label>
-            </div>
-          ))}
+        <div className={styles.optionsContainer}>
+          <h2>Select number of rounds:</h2>
+          <div className={styles.roundSelectionList}>
+            {ROUND_SELECTIONS.map((round, index) => (
+              <div key={index}>
+                <input
+                  type="radio"
+                  id={round.toString()}
+                  value={round}
+                  {...register("rounds")}
+                />
+                <label htmlFor={round.toString()}>{round.toString()}</label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className={styles.buttonWrapper}>
-        <button type="submit">Create Game</button>
-        <button onClick={() => props.send("BACK")}>Cancel</button>
-      </div>
-    </form>
+        <div className={styles.optionsContainer}>
+          <h2>Select categories:</h2>
+          <div className={styles.categoriesList}>
+            {CATEGORIES.map((category, index) => (
+              <div key={index}>
+                <input
+                  type="checkbox"
+                  id={category.id}
+                  value={category.value}
+                  {...register("categories")}
+                />
+                <label htmlFor={category.id}>{category.value}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.buttonWrapper}>
+          <button type="submit">Create Game</button>
+          <button onClick={() => props.send("BACK")}>Cancel</button>
+        </div>
+      </form>
+    </div>
   );
 };
