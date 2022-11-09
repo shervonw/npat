@@ -40,10 +40,12 @@ export const Score: React.FC<{
 
   const similarityCheck = useCallback(
     (category: string, currentUserId: string) => {
-      const { responses: currentResponses = {} } = responseList.find(
-        ({ user }) => user.id === currentUserId
-      ) || {};
-      const currentUserResponse = currentResponses[category];
+      const { responses: currentResponses = {} } =
+        responseList.find(({ user }) => user.id === currentUserId) || {};
+
+      const currentUserResponse = currentResponses?.[category]
+        ? currentResponses[category].toLowerCase().trim()
+        : null;
 
       return responseList
         .filter(({ user }) => user.id !== currentUserId)
@@ -174,12 +176,8 @@ export const Score: React.FC<{
                     const response = responses?.[category];
                     const key = `${user.id}-${category}`;
 
-
                     return (
-                      <div
-                        key={key}
-                        className={styles.scoreListItem}
-                      >
+                      <div key={key} className={styles.scoreListItem}>
                         <div
                           className={
                             similar ? styles.scoreListItemHighlight : ""
