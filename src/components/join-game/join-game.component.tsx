@@ -36,7 +36,7 @@ export const JoinGame: React.FC<{
         emoji: getEmoji(),
       };
 
-      setGameState({ type: "ROOM_CODE", value: formData.roomCode });
+      setGameState({ type: "ROOM_CODE", value: formData.roomCode.toLowerCase() });
 
       setUserState({ type: "CURRENT_USER", value: newUser });
 
