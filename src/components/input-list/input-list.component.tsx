@@ -13,7 +13,7 @@ export const InputList: React.FC<{
   send: (event: any) => void;
 }> = (props) => {
   const [roundChannel, setRoundChannel] = useState<RealtimeChannel>();
-  const { createBroadcastChannel } = useCreateChannel();
+  const { createPresenceChannel } = useCreateChannel();
   const [gameState, setGameState] = useGameState();
   const [userState] = useUserState();
   const { seconds, startTimer } = useTimer();
@@ -34,22 +34,27 @@ export const InputList: React.FC<{
   );
 
   useMount(() => {
-    const newRoundChannel = createBroadcastChannel("round");
+    const presenceKey = `round-${props.context.round}`;
+    const newRoundChannel = createPresenceChannel(presenceKey);
 
     setRoundChannel(newRoundChannel);
 
-    newRoundChannel.on("broadcast", { event: "submit" }, ({ payload }) => {
-      if (payload.seconds >= 0 && !user.leader) {
-        setTimerValue(payload.seconds);
-      }
+    newRoundChannel.on("presence", { event: "sync" }, () => {
+      const presenceRoundState = newRoundChannel.presenceState()[presenceKey];
 
-      if (payload.submit || payload.seconds === 0) {
+      if (presenceRoundState?.length > 0) {
         setGameState({
           type: "RESPONSES",
           value: { round: props.context.round, responses: getValues() },
         });
 
         props.send("SCORE");
+      }
+    })
+
+    newRoundChannel.on("broadcast", { event: "submit" }, ({ payload }) => {
+      if (payload.seconds >= 0 && !user.leader) {
+        setTimerValue(payload.seconds);
       }
     });
 
@@ -65,13 +70,8 @@ export const InputList: React.FC<{
 
       await delay();
 
-      roundChannel?.send({
-        type: "broadcast",
-        event: "submit",
-        payload: {
-          seconds: 0,
-          submit: true,
-        },
+      roundChannel?.track({
+        submit: true,
       });
 
       props.send({ type: "SCORE" });
