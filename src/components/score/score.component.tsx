@@ -20,11 +20,11 @@ export const Score: React.FC<{
   const delay = useDelay();
 
   const { allResponses, categories, scoringPartners } = gameState;
-  const { user, users } = userState;
+  const { user: currentUser, users } = userState;
 
   const playerIdToScore = useMemo(
-    () => scoringPartners?.[user.id],
-    [scoringPartners, user.id]
+    () => scoringPartners?.[currentUser.id],
+    [scoringPartners, currentUser.id]
   );
 
   const responseList = useMemo(
@@ -85,7 +85,7 @@ export const Score: React.FC<{
   });
 
   useAsync(async () => {
-    if (channel && user.leader) {
+    if (channel && currentUser.leader) {
       let scoringPartners: Record<string, string> = {};
 
       const userIdList1 = users.slice().map((user: any) => user.id);
@@ -161,6 +161,8 @@ export const Score: React.FC<{
                   <span>
                     You&apos;re scoring for <span>{user.name}</span>
                   </span>
+                ) : currentUser.id === user.id ? (
+                  "Your responses"
                 ) : (
                   `${user.name}'s responses`
                 )}
