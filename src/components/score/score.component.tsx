@@ -27,45 +27,6 @@ export const Score: React.FC<{
     [scoringPartners, user.id]
   );
 
-  const playerResponses = useMemo(() => {
-    return allResponses?.[playerIdToScore]?.[props.context.round];
-  }, [allResponses, playerIdToScore, props.context.round]);
-
-  const similarityCheck = useCallback(
-    (category: string) => {
-      if (!allResponses || !playerResponses) {
-        return false;
-      }
-
-      for (const [userIdForResponse, responses] of Object.entries(
-        allResponses
-      )) {
-        const _responses = responses as any;
-        const categoryResponse =
-          _responses?.[props.context.round]?.[category]?.trim();
-        const playerCategoryResponse = playerResponses?.[category]?.trim();
-
-        if (
-          !categoryResponse ||
-          !playerCategoryResponse ||
-          userIdForResponse !== user.id
-        ) {
-          continue;
-        }
-
-        if (
-          categoryResponse.toLowerCase() ===
-          playerCategoryResponse.toLowerCase()
-        ) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-    [allResponses, playerResponses, props.context.round, user.id]
-  );
-
   const responseList = useMemo(
     () =>
       transformReponses(
@@ -75,6 +36,30 @@ export const Score: React.FC<{
         users
       ),
     [allResponses, playerIdToScore, props.context.round, users]
+  );
+
+  const similarityCheck = useCallback(
+    (category: string, currentUserId: string) => {
+      const { responses: currentResponses } = responseList.find(
+        ({ user }) => user.id === currentUserId
+      );
+      const currentUserResponse = currentResponses[category];
+
+      return responseList
+        .filter(({ user }) => user.id !== currentUserId)
+        .some(({ responses }) => {
+          const otherResponse = responses[category]
+            ? responses[category].toLowerCase().trim()
+            : null;
+
+          return (
+            currentUserResponse &&
+            otherResponse &&
+            currentUserResponse === otherResponse
+          );
+        });
+    },
+    [responseList]
   );
 
   useMount(() => {
@@ -127,11 +112,11 @@ export const Score: React.FC<{
   }, [channel]);
 
   useEffect(() => {
-    if (playerIdToScore && playerResponses) {
+    if (playerIdToScore) {
       const initialScore: Record<string, number> = {};
 
       categories.forEach((category: string) => {
-        const similar = similarityCheck(category);
+        const similar = similarityCheck(category, playerIdToScore);
         if (similar) {
           initialScore[category] = 5;
         } else {
@@ -142,7 +127,7 @@ export const Score: React.FC<{
       setCurrentScore(initialScore);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerIdToScore, playerResponses, scoringPartners]);
+  }, [playerIdToScore, scoringPartners]);
 
   useEffect(() => {
     if (Object.keys(currentScore).length) {
@@ -166,13 +151,13 @@ export const Score: React.FC<{
         <span>- means duplicate answer</span>
       </div>
       {responseList.map(({ user, responses }, userIndex) => {
-        const selfScoreCard = user.id === playerIdToScore;
+        const isScoring = user.id === playerIdToScore;
 
         return (
           <>
             <div key={`${user.id}}-${userIndex}`} className={styles.card}>
               <h3>
-                {selfScoreCard ? (
+                {isScoring ? (
                   <span>
                     You&apos;re scoring for <span>{user.name}</span>
                   </span>
@@ -183,7 +168,7 @@ export const Score: React.FC<{
               <div className={styles.scoreLayout}>
                 {categories &&
                   categories.map((category: any, index: number) => {
-                    const similar = similarityCheck(category);
+                    const similar = similarityCheck(category, user.id);
                     const response = responses?.[category];
 
                     return (
@@ -198,7 +183,7 @@ export const Score: React.FC<{
                         >
                           {category}: {response || "-"}
                         </div>
-                        {response && selfScoreCard && (
+                        {response && isScoring && (
                           <NumberInput
                             category={category}
                             currentScore={currentScore}
