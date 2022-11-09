@@ -17,13 +17,11 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
   const { Component } = getStateMeta(state);
 
   useMount(() => {
-    var noSleep = new NoSleep();
-
     // Enable wake lock.
     window.addEventListener(
       "click",
       () => {
-        noSleep.enable();
+        new NoSleep().enable();
       },
       false
     );
