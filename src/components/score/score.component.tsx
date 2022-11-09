@@ -112,7 +112,7 @@ export const Score: React.FC<{
   }, [channel]);
 
   useEffect(() => {
-    if (playerIdToScore) {
+    if (playerIdToScore && responseList.length) {
       const initialScore: Record<string, number> = {};
 
       categories.forEach((category: string) => {
@@ -127,8 +127,7 @@ export const Score: React.FC<{
 
       setCurrentScore(initialScore);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerIdToScore, responseList]);
+  }, [categories, playerIdToScore, responseList, similarityCheck]);
 
   useEffect(() => {
     if (Object.keys(currentScore).length) {
