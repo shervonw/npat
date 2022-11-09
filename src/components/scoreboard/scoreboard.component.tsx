@@ -35,7 +35,7 @@ export const Scoreboard: React.FC<{
       <h2>Final Scores</h2>
       {user.id === winner?.id && (
         <h1>
-          <span>⭐</span> Congratulations you are the winner <span>👑</span>
+          <span>⭐</span> Congratulations, you won! <span>👑</span>
         </h1>
       )}
       <div className={styles.scoreTable}>
@@ -44,6 +44,7 @@ export const Scoreboard: React.FC<{
             <div key={user.id} className={styles.scoreboardItem}>
               <div className={styles.position}>{index + 1}.</div>
               <div className={styles.name}>{user.name} </div>
+              <div className={styles.finalScore}>{user.score} </div>
             </div>
           );
         })}

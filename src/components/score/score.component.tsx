@@ -174,7 +174,7 @@ export const Score: React.FC<{
               <h3>
                 {selfScoreCard ? (
                   <span>
-                    Youre scoring for <span>{user.name}</span>
+                    You&apos;re scoring for <span>{user.name}</span>
                   </span>
                 ) : (
                   `${user.name}'s responses`

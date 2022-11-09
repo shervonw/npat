@@ -5,10 +5,15 @@
 
 .container > h1 {
   display: flex;
+  color: royalblue;
+}
+
+.container > h1 > span{
+  margin: 0 2rem;
 }
 
 .scoreTable {
-  margin-top: 2rem;
+  margin: 3rem;
   padding-left: 2rem;
 }
 

@@ -46,5 +46,5 @@ input[type=text] {
   height: 2rem;
   width: 100%;
   padding: 1.25rem 1rem;
-  border: solid;
+  border: 1px solid;
 }

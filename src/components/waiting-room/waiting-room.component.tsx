@@ -82,7 +82,7 @@ export const WaitingRoom: React.FC<{
       </div>
 
       <div className={styles.userListContainer}>
-        <h3>Players in room</h3>
+        <h3>Players in the room</h3>
         <UserList users={users} />
       </div>
 
