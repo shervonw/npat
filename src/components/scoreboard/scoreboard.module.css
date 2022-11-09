@@ -1,0 +1,32 @@
+.container > h1,
+.container > h2 {
+  text-align: center;
+}
+
+.container > h1 {
+  display: flex;
+}
+
+.scoreTable {
+  margin-top: 2rem;
+  padding-left: 2rem;
+}
+
+.scoreboardItem {
+  display: flex;
+  margin-bottom: 1rem;
+}
+.scoreboardItem > div {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+.scoreboardItem > div:first-child {
+  flex-basis: 2rem;
+}
+.scoreboardItem > div:nth-child(2) {
+  flex-grow: 1;
+}
+
+.buttonWrapper > button {
+  margin: 1.5rem auto 0;
+}

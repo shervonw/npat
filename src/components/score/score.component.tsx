@@ -165,12 +165,12 @@ export const Score: React.FC<{
         <div className={styles.yellowBox} />
         <span>- means duplicate answer</span>
       </div>
-      {responseList.map(({ user, responses }, index) => {
+      {responseList.map(({ user, responses }, userIndex) => {
         const selfScoreCard = user.id === playerIdToScore;
 
         return (
           <>
-            <div key={index} className={styles.card}>
+            <div key={`${user.id}}-${userIndex}`} className={styles.card}>
               <h3>
                 {selfScoreCard ? (
                   <span>
@@ -187,7 +187,10 @@ export const Score: React.FC<{
                     const response = responses?.[category];
 
                     return (
-                      <div key={index} className={styles.scoreListItem}>
+                      <div
+                        key={`${user.id}-${category}-${index}`}
+                        className={styles.scoreListItem}
+                      >
                         <div
                           className={
                             similar ? styles.scoreListItemHighlight : ""
@@ -208,7 +211,7 @@ export const Score: React.FC<{
                   })}
               </div>
             </div>
-            {index === 0 && (
+            {userIndex === 0 && (
               <>
                 <div className={styles.buttonWrapper}>
                   <button onClick={() => props.send("NEXT")}>Next Round</button>

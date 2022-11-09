@@ -8,7 +8,7 @@ import { useDelay } from "../../hooks/delay.hook";
 import { useGetLetter } from "../../hooks/get-letter.hook";
 import { calculateTotalScore, getUserIds, sortByScore } from "../../utils";
 import { UserList } from "../user-list";
-import styles from "./score-review.module.css"
+import styles from "./score-review.module.css";
 
 export const ScoreReview: React.FC<{
   context: any;
@@ -92,7 +92,7 @@ export const ScoreReview: React.FC<{
 
       {canStartGame && user?.leader && (
         <div className={styles.buttonWrapper}>
-        <button onClick={startGame}>Ready</button>
+          <button onClick={startGame}>Ready</button>
         </div>
       )}
     </div>
