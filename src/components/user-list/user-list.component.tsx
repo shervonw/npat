@@ -20,7 +20,7 @@ export const UserList = ({
             <p>
               {user.leader && <span>👑</span>} {user.name}
             </p>
-            {user.score && <p className={styles.score}>{user.score}</p>}
+            {user.score !== undefined && <p className={styles.score}>{user.score}</p>}
           </div>
         ))}
     </div>
