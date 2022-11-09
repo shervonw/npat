@@ -1,6 +1,6 @@
 import { useMachine } from "@xstate/react";
 import type { NextPage } from "next";
-import NoSleep from 'nosleep.js';
+import NoSleep from "nosleep.js";
 import { useMount } from "react-use";
 import { Game } from "../src/components/game";
 import { Home } from "../src/components/home";
@@ -20,10 +20,9 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
     var noSleep = new NoSleep();
 
     // Enable wake lock.
-    document.addEventListener(
+    window.addEventListener(
       "click",
-      function enableNoSleep() {
-        document.removeEventListener("click", enableNoSleep, false);
+      () => {
         noSleep.enable();
       },
       false
