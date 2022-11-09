@@ -146,7 +146,7 @@ export const Score: React.FC<{
 
   return (
     <div className={styles.container}>
-      <h2>Time to score!</h2>
+      <h1>Time to score!</h1>
       <div className={styles.legend}>
         <div className={styles.yellowBox} />
         <span>- means duplicate answer</span>
@@ -157,7 +157,7 @@ export const Score: React.FC<{
         return (
           <>
             <div key={`${user.id}}-${userIndex}`} className={styles.card}>
-              <h3>
+              <h2>
                 {isScoring ? (
                   <span>
                     You&apos;re scoring for <span>{user.name}</span>
@@ -167,7 +167,7 @@ export const Score: React.FC<{
                 ) : (
                   `${user.name}'s responses`
                 )}
-              </h3>
+              </h2>
               <div className={styles.scoreLayout}>
                 {categories &&
                   categories.map((category: any, index: number) => {

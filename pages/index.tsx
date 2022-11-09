@@ -32,7 +32,6 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
       <GameStateProvider>
         <Game send={send}>
           {state.value === "home" && <Home send={send} />}
-
           {Component && <Component context={state.context} send={send} />}
         </Game>
       </GameStateProvider>

@@ -4,6 +4,7 @@ html {
 
 * {
   box-sizing: border-box;
+  font-family: 'Indie Flower', sans-serif;
 }
 
 #__next,
@@ -14,8 +15,6 @@ body {
 }
 
 body {
-  font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica',
-    'Arial', sans-serif;
   height: inherit;
   width: 100vw;
 }

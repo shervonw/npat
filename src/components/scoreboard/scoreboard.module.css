@@ -5,7 +5,7 @@
 
 .container > h1 {
   display: flex;
-  color: royalblue;
+  color: dodgerblue;
 }
 
 .container > h1 > span {
@@ -22,7 +22,7 @@
   margin-bottom: 1rem;
 }
 .scoreboardItem > div {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 .scoreboardItem > div:first-child {

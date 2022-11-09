@@ -1,4 +1,4 @@
-.container > h2 {
+.container > h1 {
   text-align: center;
   margin-top: 0;
 }
@@ -9,7 +9,7 @@
   margin-bottom: 1rem;
 }
 .legend > span {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .yellowBox {
@@ -30,11 +30,12 @@
 .card:last-of-type {
   margin-bottom: 2rem;
 }
-.card > h3 {
+.card > h2 {
+  margin-top: 0;
   text-align: center;
 }
-.card > h3 > span > span {
-  color: royalblue;
+.card > h2 > span > span {
+  color: dodgerblue;
 }
 
 .scoreLayout {
@@ -46,6 +47,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   min-height: 2rem;
+  font-size: 1.125rem;
 }
 .scoreListItem:not(:last-child) {
   margin-bottom: 1rem;

@@ -4,7 +4,7 @@
 }
 
 .header > p {
-  background-color: royalblue;
+  background-color: dodgerblue;
   height: 3.5rem;
   width: 3.5rem;
   border-radius: 50%;
@@ -18,7 +18,7 @@
 }
 
 .headerContent > h2 > span {
-  color: royalblue;
+  color: dodgerblue;
 }
 
 .inputListItem {
