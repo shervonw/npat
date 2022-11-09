@@ -47,8 +47,8 @@ export const Score: React.FC<{
 
       return responseList
         .filter(({ user }) => user.id !== currentUserId)
-        .some(({ responses }) => {
-          const otherResponse = responses[category]
+        .some(({ responses = {} } = {}) => {
+          const otherResponse = responses?.[category]
             ? responses[category].toLowerCase().trim()
             : null;
 
@@ -156,27 +156,29 @@ export const Score: React.FC<{
 
         return (
           <>
-            <div key={`${user.id}}-${userIndex}`} className={styles.card}>
+            <div key={userIndex} className={styles.card}>
               <h2>
                 {isScoring ? (
                   <span>
                     You&apos;re scoring for <span>{user.name}</span>
                   </span>
                 ) : currentUser.id === user.id ? (
-                  "Your responses"
+                  "Your response"
                 ) : (
-                  `${user.name}'s responses`
+                  `${user.name}'s response`
                 )}
               </h2>
               <div className={styles.scoreLayout}>
                 {categories &&
-                  categories.map((category: any, index: number) => {
+                  categories.map((category: any) => {
                     const similar = similarityCheck(category, user.id);
                     const response = responses?.[category];
+                    const key = `${user.id}-${category}`;
+
 
                     return (
                       <div
-                        key={`${user.id}-${category}-${index}`}
+                        key={key}
                         className={styles.scoreListItem}
                       >
                         <div
