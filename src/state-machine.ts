@@ -103,7 +103,7 @@ export const stateMachine = createMachine<StateContext>(
           },
           playing: {
             on: {
-              NEXT: {
+              SCORE: {
                 target: "score",
               },
               INCREMENT_ROUND: {

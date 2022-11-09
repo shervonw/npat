@@ -49,7 +49,7 @@ export const InputList: React.FC<{
           value: { round: props.context.round, responses: getValues() },
         });
 
-        props.send("NEXT");
+        props.send("SCORE");
       }
     });
 
@@ -74,7 +74,7 @@ export const InputList: React.FC<{
         },
       });
 
-      props.send({ type: "NEXT" });
+      props.send({ type: "SCORE" });
     },
     [delay, roundChannel, props, setGameState]
   );
