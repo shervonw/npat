@@ -1,6 +1,7 @@
 import { useMachine } from "@xstate/react";
 import type { NextPage } from "next";
 import NoSleep from "nosleep.js";
+import { useEffect, useState } from "react";
 import { useMount } from "react-use";
 import { Game } from "../src/components/game";
 import { Home } from "../src/components/home";
@@ -8,6 +9,7 @@ import { GameStateProvider, UserStateProvider } from "../src/context";
 import { getStateMeta, stateMachine } from "../src/state-machine";
 
 const Index: NextPage<{ code: string }> = ({ code }) => {
+  const [wakeLock, setWakeLock] = useState<NoSleep>();
   const [state, send] = useMachine(stateMachine, {
     context: {
       roomCode: code,
@@ -16,16 +18,25 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
 
   const { Component } = getStateMeta(state);
 
-  useMount(() => {
-    // Enable wake lock.
-    window.addEventListener(
-      "click",
-      () => {
-        new NoSleep().enable();
-      },
-      false
-    );
-  });
+  useEffect(() => {
+    if (!wakeLock) {
+      setWakeLock(new NoSleep());
+    }
+  }, [wakeLock]);
+
+  useEffect(() => {
+    if (wakeLock) {
+      window.addEventListener(
+        "click",
+        () => {
+          if (!wakeLock.isEnabled) {
+            wakeLock.enable(); // Enable wake lock.
+          }
+        },
+        false
+      );
+    }
+  }, [wakeLock]);
 
   return (
     <UserStateProvider>
