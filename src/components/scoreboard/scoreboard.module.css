@@ -13,8 +13,7 @@
 }
 
 .scoreTable {
-  margin: 3rem;
-  padding-left: 2rem;
+  margin: 1rem;
 }
 
 .scoreboardItem {
@@ -30,6 +29,10 @@
 }
 .scoreboardItem > div:nth-child(2) {
   flex-grow: 1;
+}
+.scoreboardItem > div:last-child {
+  flex-basis: 6.25rem;
+  text-align: center;
 }
 
 .buttonWrapper > button {

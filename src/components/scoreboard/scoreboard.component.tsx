@@ -39,12 +39,17 @@ export const Scoreboard: React.FC<{
         </h1>
       )}
       <div className={styles.scoreTable}>
+        <div key={user.id} className={styles.scoreboardItem}>
+          <div className={styles.position} />
+          <div className={styles.name}>Name</div>
+          <div className={styles.finalScore}>Final Score</div>
+        </div>
         {usersWithScore.map((user, index) => {
           return (
             <div key={user.id} className={styles.scoreboardItem}>
               <div className={styles.position}>{index + 1}.</div>
-              <div className={styles.name}>{user.name} </div>
-              <div className={styles.finalScore}>{user.score} </div>
+              <div className={styles.name}>{user.name}</div>
+              <div className={styles.finalScore}>{user.score}</div>
             </div>
           );
         })}
