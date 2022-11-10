@@ -3,36 +3,54 @@
   text-align: center;
 }
 
-.container > h1 {
+.container > h2 {
   display: flex;
+  justify-content: center;
   color: dodgerblue;
 }
 
-.container > h1 > span {
-  margin: 0 2rem;
+.container > h2 > span:nth-child(odd) {
+  margin: 0 1rem;
+  flex-basis: 2rem;
+}
+
+.container > h2 > span:nth-child(even) {
+  overflow-wrap: anywhere;
 }
 
 .scoreTable {
   margin: 1rem;
 }
 
-.scoreboardItem {
+.scoreboardItem,
+.scoreboardItemHighlight {
   display: flex;
   margin-bottom: 1rem;
+  padding: 0 0.5rem;
 }
-.scoreboardItem > div {
+.scoreboardItem > div,
+.scoreboardItemHighlight > div {
   font-size: 1.25rem;
   font-weight: 500;
 }
-.scoreboardItem > div:first-child {
+.scoreboardItem > div:first-child,
+.scoreboardItemHighlight > div:first-child {
   flex-basis: 2rem;
 }
-.scoreboardItem > div:nth-child(2) {
+.scoreboardItem > div:nth-child(2),
+.scoreboardItemHighlight > div:nth-child(2) {
   flex-grow: 1;
+  padding: 0 0.5rem;
+  overflow-wrap: anywhere;
 }
-.scoreboardItem > div:last-child {
+.scoreboardItem > div:last-child,
+.scoreboardItemHighlight > div:last-child {
   flex-basis: 6.25rem;
   text-align: center;
+}
+
+.scoreboardItemHighlight {
+  background-color: lightskyblue;
 }
 
 .buttonWrapper > button {

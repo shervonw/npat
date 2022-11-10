@@ -38,9 +38,7 @@ export const calculateTotalScore = (
 };
 
 export const sortByScore = (list: any[]) =>
-  sort((a, b) => {
-    return b - a;
-  }, list);
+  sort((a, b) => b.score - a.score, list);
 
 export const getUserIds = (users: any) =>
   pipe<any[], any[], string[]>(sortBy(prop("id")), pluck("id"))(users);
