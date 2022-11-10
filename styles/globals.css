@@ -43,7 +43,6 @@ button[disabled] {
   }
 }
 
-
 input[type=text] {
   flex-grow: 1;
   background-color: transparent;
