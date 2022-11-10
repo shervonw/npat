@@ -55,6 +55,7 @@
 .scoreListItem > p {
   margin: 0 0.25rem 0 0;
   overflow-wrap: anywhere;
+  width: 100%;
 }
 
 .scoreListItemHighlight {
