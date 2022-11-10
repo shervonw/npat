@@ -37,9 +37,9 @@ export const Scoreboard: React.FC = () => {
         <h2>
           <span>⭐</span>
           <span>
-            Congratulations, <br /> you won!
+            Congratulations,<br />you won!
           </span>
-          <span>👑</span>
+          <span>🏆</span>
         </h2>
       ) : (
         <h2>
@@ -52,7 +52,7 @@ export const Scoreboard: React.FC = () => {
         <div key="header" className={styles.scoreboardItem}>
           <div className={styles.position} />
           <div className={styles.name}>Name</div>
-          <div className={styles.finalScore}>Final Score</div>
+          <div className={styles.finalScore}>Score</div>
         </div>
         {usersWithScore.map((user, index) => {
           const scoreboardItemStyles =

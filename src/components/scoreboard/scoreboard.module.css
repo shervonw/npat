@@ -24,7 +24,8 @@
 
 .scoreboardItem,
 .scoreboardItemHighlight {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1.5rem auto 2.5rem;
   margin-bottom: 1rem;
   padding: 0 0.5rem;
 }
