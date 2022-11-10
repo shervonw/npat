@@ -28,11 +28,11 @@ export const NumberInput = ({
   }, [category, currentScore, numberValue, setCurrentScore]);
 
   return (
-    <div>
+    <div className={styles.container}>
       <button className={styles.button} disabled={numberValue === 0} onClick={onMinus}>
         -
       </button>
-      {numberValue}
+      <span>{numberValue}</span>
       <button className={styles.button} disabled={numberValue === 10} onClick={onPlus}>
         +
       </button>

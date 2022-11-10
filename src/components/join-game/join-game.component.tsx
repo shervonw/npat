@@ -36,7 +36,10 @@ export const JoinGame: React.FC<{
         emoji: getEmoji(),
       };
 
-      setGameState({ type: "ROOM_CODE", value: formData.roomCode.toLowerCase() });
+      setGameState({
+        type: "ROOM_CODE",
+        value: formData.roomCode.toLowerCase(),
+      });
 
       setUserState({ type: "CURRENT_USER", value: newUser });
 
@@ -49,7 +52,11 @@ export const JoinGame: React.FC<{
     <form onSubmit={handleSubmit(onSubmitHanlder)}>
       <div className={styles.inputContainer}>
         <label>Your Name:</label>
-        <input {...register("user", { required: true, maxLength: 20 })} type="text" />
+        <input
+          {...register("user", { required: true })}
+          maxLength={30}
+          type="text"
+        />
       </div>
 
       <div className={styles.inputContainer}>

@@ -175,23 +175,24 @@ export const Score: React.FC<{
                     const similar = similarityCheck(category, user.id);
                     const response = responses?.[category];
                     const key = `${user.id}-${category}`;
+                    const similarStyle = similar
+                      ? styles.scoreListItemHighlight
+                      : "";
 
                     return (
                       <div key={key} className={styles.scoreListItem}>
-                        <div
-                          className={
-                            similar ? styles.scoreListItemHighlight : ""
-                          }
-                        >
+                        <p className={similarStyle}>
                           {category}: {response || "-"}
-                        </div>
+                        </p>
                         {response && isScoring && (
-                          <NumberInput
-                            category={category}
-                            currentScore={currentScore}
-                            setCurrentScore={setCurrentScore}
-                            value={similar ? 5 : 0}
-                          />
+                          <div>
+                            <NumberInput
+                              category={category}
+                              currentScore={currentScore}
+                              setCurrentScore={setCurrentScore}
+                              value={similar ? 5 : 0}
+                            />
+                          </div>
                         )}
                       </div>
                     );

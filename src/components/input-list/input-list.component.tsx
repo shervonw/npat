@@ -123,8 +123,9 @@ export const InputList: React.FC<{
           categories.map((category: any, index: number) => (
             <div key={index} className={styles.inputListItem}>
               <input
-                {...register(category, { maxLength: 30 })}
+                {...register(category)}
                 autoFocus={index === 0}
+                maxLength={30}
                 placeholder={category}
                 type="text"
               />

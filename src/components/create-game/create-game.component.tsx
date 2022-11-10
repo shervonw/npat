@@ -64,7 +64,8 @@ export const CreateGame: React.FC<{
         <div className={styles.inputContainer}>
           <label>Your Name:</label>
           <input
-            {...register("user", { required: true, maxLength: 20 })}
+            {...register("user", { required: true })}
+            maxLength={20}
             type="text"
           />
         </div>

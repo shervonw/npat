@@ -44,26 +44,21 @@
 }
 
 .scoreListItem {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  justify-content: space-between;
   min-height: 2rem;
   font-size: 1.125rem;
 }
 .scoreListItem:not(:last-child) {
   margin-bottom: 1rem;
 }
+.scoreListItem > p {
+  margin: 0 0.25rem 0 0;
+  overflow-wrap: anywhere;
+}
 
 .scoreListItemHighlight {
   background-color: yellow;
-}
-
-.scoreListItem > div {
-  display: flex;
-  align-items: center;
-}
-
-.scoreListItem > div:nth-child(2) {
-  justify-content: space-evenly;
 }
 
 .buttonWrapper > button {

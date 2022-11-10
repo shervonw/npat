@@ -1,3 +1,11 @@
+.container {
+  display: flex;
+}
+.container > span {
+  text-align: center;
+  width: 1.125rem;
+}
+
 .button {
   background-color: dodgerblue;
   color: black;

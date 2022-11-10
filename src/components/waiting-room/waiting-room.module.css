@@ -1,6 +1,7 @@
 .heading,
 .roomCodeContainer {
   text-align: center;
+  margin-bottom: 0;
 }
 
 .roomCodeContainer {
@@ -16,6 +17,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   flex-grow: 1;
+  padding: 0 0.5rem;
 }
 
 .roomCodeContent {

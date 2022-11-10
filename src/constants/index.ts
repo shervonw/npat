@@ -5,13 +5,13 @@ export const CATEGORIES = [
   { id: "place", value: "Place" },
   { id: "animal", value: "Animal" },
   { id: "thing", value: "Thing" },
-  { id: "tv-shows", value: "TV shows" },
-  { id: "movies", value: "Movies" },
-  { id: "fruits", value: "Fruits" },
-  { id: "vegetables", value: "Vegetables" },
-  { id: "books", value: "Books" },
-  { id: "subjects", value: "Subjects" },
-  { id: "celebrities", value: "Celebrities" },
+  { id: "tv-show", value: "TV show" },
+  { id: "movie", value: "Movie" },
+  { id: "fruit", value: "Fruit" },
+  { id: "vegetable", value: "Vegetable" },
+  { id: "book", value: "Book" },
+  { id: "subject", value: "Subject" },
+  { id: "celebrity", value: "Celebrity" },
 ];
 
 export const ROUND_SELECTIONS = [5, 7, 10];
