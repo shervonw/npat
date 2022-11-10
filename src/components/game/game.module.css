@@ -2,7 +2,7 @@
   height: inherit;
   margin: auto;
   max-width: 34rem;
-  padding: 1rem;
+  padding: 2rem 1rem;
   width: 100%;
 }
 @media (min-width: 768px) {
