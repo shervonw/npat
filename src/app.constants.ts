@@ -9,10 +9,10 @@ import { Scoreboard } from "./components/scoreboard";
 import { WaitingRoom } from "./components/waiting-room";
 import { appStateMachine } from "./app.machine";
 import { Home } from "./components/home";
-import { ComponentType } from "./app.types";
+import { StateComponentType } from "./app.types";
 
 
-export const componentsMap: Map<string, ComponentType> = new Map([
+export const componentsMap: Map<string, StateComponentType> = new Map([
   ["home.index", Home],
   ["home.join", JoinGame]
 ]);

@@ -1,4 +1,4 @@
-import { AnyState, assign, createMachine } from "xstate";
+import { assign, createMachine } from "xstate";
 import { StateContext } from "./app.types";
 import { ALPHABET } from "./components/create-game/create-game.constants";
 import { generateScoringPartners } from "./utils";
@@ -24,17 +24,10 @@ const createPlayer = (name: string, leader: boolean = false) => {
   };
 };
 
-const STATE_MACHINE_NAME = "npat-game";
-
-export const getStateMeta = (state: AnyState) => {
-  const currentStateId = Object.keys(state.meta).sort().reverse()[0];
-  return state.meta?.[currentStateId] ?? {};
-};
-
 export const appStateMachine = createMachine<StateContext>(
   {
     predictableActionArguments: true,
-    id: STATE_MACHINE_NAME,
+    id: "npat-game",
     initial: "initial",
     context: {
       round: 0,
@@ -113,18 +106,7 @@ export const appStateMachine = createMachine<StateContext>(
           playing: {
             invoke: {
               id: "startTimer",
-              src: (context) => {
-                return new Promise((resolve) => {
-                  let count = context.timerValue;
-                  setInterval(() => {
-                    count -= 1;
-
-                    if (count <= 0) {
-                      resolve("done");
-                    }
-                  }, 1000);
-                });
-              },
+              src: startTimer,
               onDone: {
                 target: "score",
                 // actions: ["updateResponses"],

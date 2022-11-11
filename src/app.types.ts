@@ -25,7 +25,7 @@ export interface StateContext {
   timerValue: number;
 }
 
-export type ComponentType = React.FC<{
+export type StateComponentType = React.FC<{
   send: (event: EventObject) => void;
   context: StateContext;
 }>;
