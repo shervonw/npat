@@ -51,12 +51,12 @@ export const useUsersChannel = ({ context, send }: StateComponentProps) => {
 
       channel.subscribe(setSubscribeStatus);
 
-      // channel.track({
-      //   id: context.userId,
-      //   leader: context.leader,
-      //   name: context.name,
-      //   emoji: context.emoji,
-      // });
+      channel.track({
+        id: context.userId,
+        leader: context.leader,
+        name: context.name,
+        emoji: context.emoji,
+      });
     }
 
     return () => {
