@@ -1,4 +1,4 @@
-import { ComponentType } from "../../app.types";
+import { StateComponentType } from "../../app.types";
 import styles from "./home.module.css";
 
 const BUTTON_CONFIG = [
@@ -16,7 +16,7 @@ const BUTTON_CONFIG = [
   },
 ];
 
-export const Home: ComponentType = ({ send }) => {
+export const Home: StateComponentType = ({ send }) => {
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>Name, Place, Animal, Thing</h1>
