@@ -1,10 +1,17 @@
 import type { NextPage } from "next";
 import { useAppMachine } from "../src/app-machine.hook";
+import styles from "../styles/app.module.css";
 
 const Index: NextPage<{ code: string }> = ({ code }) => {
-  const { context, Component, send } = useAppMachine(code);
+  const { context, Component, send, step } = useAppMachine(code);
 
-  return <div>{Component && <Component context={context} send={send} />}</div>;
+  // console.log(context);
+
+  return (
+    <div className={styles.container}>
+      {Component && <Component context={context} send={send} />}
+    </div>
+  );
 };
 
 Index.getInitialProps = async (context): Promise<{ code: string }> => {

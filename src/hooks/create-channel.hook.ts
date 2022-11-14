@@ -1,12 +1,7 @@
 import { useCallback } from "react";
 import { supabase } from "../client/supabase-client";
-import { useGameState } from "../context";
 
-export const useCreateChannel = () => {
-  const [gameState] = useGameState();
-
-  const { roomCode } = gameState;
-
+export const useCreateChannel = (roomCode: string) => {
   const createPresenceChannel = useCallback(
     (key: string, presenceKey?: string) =>
       supabase.channel(`${roomCode}#${key}`, {

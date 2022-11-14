@@ -1,25 +1,21 @@
 import { useCallback } from "react";
 import { useGameState } from "../context";
-import { getRandomInt } from "../utils";
 
 export const useGetLetter = () => {
   const [gameState, setGameState] = useGameState();
-  const { possibleAlphabet } = gameState
+  const { possibleAlphabet } = gameState;
 
   return useCallback(() => {
-    const alphabet = possibleAlphabet.slice();
-    const randomIndex = getRandomInt(alphabet.length - 1);
+    const alphabet = possibleAlphabet.slice().sort(() => 0.5 - Math.random());
 
-    const letter = alphabet[randomIndex];
+    const letter = alphabet.shift();
 
-    alphabet.splice(randomIndex, 1);
-
-    setGameState({ type: "CURRENT_LETTER", value: letter })
-    setGameState({ type: "POSSIBLE_ALPHABET", value: alphabet })
+    setGameState({ type: "CURRENT_LETTER", value: letter });
+    setGameState({ type: "POSSIBLE_ALPHABET", value: alphabet });
 
     return {
       currentLetter: letter,
       possibleAlphabet: alphabet,
-    }
+    };
   }, [possibleAlphabet, setGameState]);
 };

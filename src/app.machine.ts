@@ -1,27 +1,20 @@
 import { assign, createMachine } from "xstate";
 import { StateContext } from "./app.types";
+import {
+  createPlayer,
+  generateRoomName,
+  generateScoringPartners,
+  startTimer,
+} from "./app.utils";
 import { ALPHABET } from "./components/create-game/create-game.constants";
-import { generateScoringPartners } from "./utils";
 
-const startTimer = (context: StateContext) => {
-  return new Promise((resolve) => {
-    let count = context.timerValue;
-    setInterval(() => {
-      count -= 1;
-
-      if (count <= 0) {
-        resolve("done");
-      }
-    }, 1000);
-  })
-}
-
-const createPlayer = (name: string, leader: boolean = false) => {
-  return {
-    id: Math.floor(Math.random() * 100000000).toString(),
-    name,
-    leader,
-  };
+const DEFAULT_CONTEXT = {
+  gameState: {
+    maxRounds: 5,
+    possibleAlphabet: ALPHABET,
+  },
+  round: 0,
+  timerValue: 60,
 };
 
 export const appStateMachine = createMachine<StateContext>(
@@ -29,14 +22,7 @@ export const appStateMachine = createMachine<StateContext>(
     predictableActionArguments: true,
     id: "npat-game",
     initial: "initial",
-    context: {
-      round: 0,
-      timerValue: 60,
-      gameState: {
-        maxRounds: 5,
-        possibleAlphabet: ALPHABET,
-      }
-    },
+    context: DEFAULT_CONTEXT,
     states: {
       initial: {
         always: [
@@ -48,6 +34,7 @@ export const appStateMachine = createMachine<StateContext>(
         id: "Home",
         states: {
           index: {
+            entry: ["resetContext"],
             on: {
               instructions: { target: "instructions" },
               create: { target: "create" },
@@ -59,24 +46,35 @@ export const appStateMachine = createMachine<StateContext>(
               back: { target: "index" },
             },
           },
-          create: {
-            on: {
-              back: { target: "index" },
-              ready: {
-                target: "#Game.waitForGameStart",
-                actions: ["createLeader"],
-              },
-              updateMaxRounds: {
-                actions: ["updateMaxRounds"],
-              },
-            },
-          },
           join: {
             on: {
               back: { target: "index" },
               ready: {
-                target: "#Game.waitForGameStart",
+                target: "#Game.waitingRoom",
+              },
+              createPlayer: {
                 actions: ["createPlayer"],
+              },
+              updateRoomCode: {
+                actions: ["updateRoomCode"],
+              },
+            },
+          },
+          create: {
+            on: {
+              back: { target: "index" },
+              ready: {
+                target: "#Game.waitingRoom",
+                actions: ["createRoomCode"],
+              },
+              updateCategories: {
+                actions: ["updateCategories"],
+              },
+              updateMaxRounds: {
+                actions: ["updateMaxRounds"],
+              },
+              createPlayer: {
+                actions: ["createLeader"],
               },
             },
           },
@@ -86,62 +84,59 @@ export const appStateMachine = createMachine<StateContext>(
         id: "Game",
         initial: "check",
         states: {
-          waitForGameStart: {
+          waitingRoom: {
             on: {
-              ready: { target: "check" },
+              ready: {
+                target: "check",
+              },
+              updatePlayers: {
+                actions: ["updatePlayers"],
+              },
+              reAssignLeader: {
+                actions: ["reAssignLeader"],
+              },
             },
           },
           check: {
+            entry: ["getLetterFromAlphabet", "incrementRounds"],
             always: [
               {
                 target: "scoreboard",
                 cond: "isAllRoundsCompleted",
               },
-              {
-                target: "playing",
-                actions: ["getLetterFromAlphabet", "incrementRounds"],
-              },
             ],
+            on: {
+              updateGameState: {
+                actions: ["updateGameState"],
+              },
+              play: {
+                target: "playing",
+              }
+            }
           },
           playing: {
-            invoke: {
-              id: "startTimer",
-              src: startTimer,
-              onDone: {
-                target: "score",
-                // actions: ["updateResponses"],
-              },
-            },
             on: {
               submitResponses: {
                 target: "score",
-                // actions: ["updateResponses"],
+                actions: ["updateResponses"],
               },
               updatePlayers: {
-                actions: ["updatePlayerList"],
+                actions: ["updatePlayers"],
+              },
+              updateTimer: {
+                actions: ["updateTimer"],
               },
             },
-            exit: ["updateResponses", "generateScorePartners"],
           },
           score: {
+            entry: ["generateScorePartners"],
             on: {
               submitScores: {
-                target: "waitForNextRound",
+                target: "waitingRoom",
                 actions: ["updateScores"],
               },
               updatePlayers: {
-                actions: ["updatePlayerList", "generateScorePartners"],
-              },
-            },
-          },
-          waitForNextRound: {
-            exit: assign({ scoringPartners: {} }),
-            on: {
-              nextRound: {
-                target: "check",
-              },
-              updatePlayers: {
-                actions: ["updatePlayerList"],
+                actions: ["updatePlayers", "generateScorePartners"],
               },
             },
           },
@@ -154,6 +149,12 @@ export const appStateMachine = createMachine<StateContext>(
   },
   {
     actions: {
+      createRoomCode: assign({
+        roomCode: (c, e) => generateRoomName(),
+      }),
+      updateRoomCode: assign({
+        roomCode: (_, e) => e.value,
+      }),
       incrementRounds: assign({
         round: (context, _) => context.round + 1,
       }),
@@ -163,32 +164,40 @@ export const appStateMachine = createMachine<StateContext>(
           maxRounds: e.value,
         }),
       }),
+      updateCategories: assign({
+        gameState: (context, e) => ({
+          ...context.gameState,
+          categories: e.value,
+        }),
+      }),
       getLetterFromAlphabet: assign({
         gameState: (context, _) => {
-          if (!context.player?.leader) {
+          if (!context?.leader) {
             return context.gameState;
           }
 
+          const alphabet = context.gameState.possibleAlphabet.slice();
+
+          alphabet.sort(() => 0.5 - Math.random());
+
+          const letter = alphabet.shift();
+
           return {
             ...context.gameState,
-            currentLetter: "letter",
-            possibleAlphabet: ["alphabet"],
-          }
+            currentLetter: letter,
+            possibleAlphabet: alphabet,
+          };
         },
       }),
-      createLeader: assign({
-        player: (_, e) => createPlayer(e.name, true),
-      }),
-      createPlayer: assign({
-        player: (_, e) => createPlayer(e.name),
-      }),
+      createLeader: assign((_, e) => createPlayer(e.value, true)),
+      createPlayer: assign((_, e) => createPlayer(e.value)),
       updateResponses: assign({
         gameState: (context, e) => ({
           ...context.gameState,
           responses: {
             ...context.gameState.responses,
-            [context.round]: e.value,         
-          }
+            [context.round]: e.value,
+          },
         }),
       }),
       updateScores: assign({
@@ -196,18 +205,40 @@ export const appStateMachine = createMachine<StateContext>(
           ...context.gameState,
           scores: {
             ...context.gameState.scores,
-            [context.round]: e.value,         
-          }
+            [context.round]: e.value,
+          },
         }),
       }),
       generateScorePartners: assign({
         gameState: (context: StateContext, __) => ({
           ...context.gameState,
-          scoringPartners: generateScoringPartners((context?.players ?? []).map((user) => user.id)),
-        })
+          scoringPartners: generateScoringPartners(
+            (context?.players ?? []).map((user) => user.id)
+          ),
+        }),
       }),
-      updatePlayerList: assign({
-        players: (_, e) => e.players,
+      updatePlayers: assign({
+        players: (_, e) => e.value,
+      }),
+      resetContext: assign(() => DEFAULT_CONTEXT),
+      updateGameState: assign({
+        gameState: (_, e) => e.value,
+      }),
+      assignPlayerAsLeader: assign({
+        leader: (c, e) => true,
+      }),
+      resetTimer: assign({
+        timerValue: (c, e) => 60,
+      }),
+      updateTimer: assign({
+        timerValue: (_, e) => e.value,
+      }),
+      addPlayer: assign({
+        players: (context, e) => [...(context?.players ?? []), e.value],
+      }),
+      removePlayer: assign({
+        players: (context, e) =>
+          (context?.players ?? []).filter((player) => player.id !== e.value),
       }),
     },
     guards: {

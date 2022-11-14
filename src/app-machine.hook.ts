@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { EventObject, StateValue } from "xstate";
 import { componentsMap } from "./app.constants";
 import { appStateMachine } from "./app.machine";
-import { ComponentType, StateContext } from "./app.types";
+import { StateComponentType, StateContext } from "./app.types";
 
 const convertStateValueToString = (value: StateValue): string => {
   if (typeof value === "object") {
@@ -17,7 +17,7 @@ interface UseWizardResult {
   step: StateValue;
   context: StateContext;
   send: (event: EventObject) => void;
-  Component?: ComponentType;
+  Component?: StateComponentType;
 }
 
 export const useAppMachine = (code: string): UseWizardResult => {

@@ -1,10 +1,6 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { v4 as uuidv4 } from "uuid";
-import { useUserState } from "../../context";
-import { useGameState } from "../../context/game.context";
-import { StateContext } from "../../state-machine";
-import { getEmoji } from "../../utils";
+import { StateComponentType } from "../../app.types";
 import styles from "./join-game.module.css";
 
 type FormData = {
@@ -12,40 +8,22 @@ type FormData = {
   user: string;
 };
 
-export const JoinGame: React.FC<{
-  context: StateContext;
-  send: (event: any) => void;
-}> = (props) => {
-  const [, setGameState] = useGameState();
-  const [, setUserState] = useUserState();
-
+export const JoinGame: StateComponentType = ({ context, send }) => {
   const { handleSubmit, register } = useForm<FormData>({
     mode: "onSubmit",
     defaultValues: {
-      roomCode: props.context.roomCode,
+      roomCode: context.roomCode,
       user: "",
     },
   });
 
   const onSubmitHanlder = useCallback(
     async (formData: FormData) => {
-      const newUser = {
-        id: uuidv4(),
-        name: formData.user,
-        leader: false,
-        emoji: getEmoji(),
-      };
-
-      setGameState({
-        type: "ROOM_CODE",
-        value: formData.roomCode.toLowerCase(),
-      });
-
-      setUserState({ type: "CURRENT_USER", value: newUser });
-
-      props.send("READY");
+      send({ type: "updateRoomCode", value: formData.roomCode });
+      send({ type: "createPlayer", value: formData.user });
+      send({ type: "ready" });
     },
-    [props, setGameState, setUserState]
+    [send]
   );
 
   return (
@@ -66,7 +44,7 @@ export const JoinGame: React.FC<{
 
       <div className={styles.buttonWrapper}>
         <button type="submit">Join Game</button>
-        <button onClick={() => props.send("BACK")}>Cancel</button>
+        <button onClick={() => send({ type: "back" })}>Cancel</button>
       </div>
     </form>
   );

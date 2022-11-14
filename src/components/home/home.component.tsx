@@ -1,21 +1,22 @@
+import { ComponentType } from "../../app.types";
 import styles from "./home.module.css";
 
 const BUTTON_CONFIG = [
   {
     label: "Instructions",
-    type: "INSTRUCTIONS",
+    type: "instructions",
   },
   {
     label: "Join",
-    type: "JOIN",
+    type: "join",
   },
   {
     label: "Create Game",
-    type: "CREATE",
+    type: "create",
   },
 ];
 
-export const Home = ({ send }: { send: any }) => {
+export const Home: ComponentType = ({ send }) => {
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>Name, Place, Animal, Thing</h1>

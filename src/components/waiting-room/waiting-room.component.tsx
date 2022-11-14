@@ -1,77 +1,48 @@
-import { RealtimeChannel } from "@supabase/supabase-js";
-import React, { useCallback, useState } from "react";
-import { useMount, useTimeoutFn } from "react-use";
-import { useGameState, useUserState } from "../../context";
-import { useCreateChannel } from "../../hooks/create-channel.hook";
+import { useCallback, useState } from "react";
+import { useTimeoutFn } from "react-use";
+import { ChannelSubscribeStatus, StateComponentType } from "../../app.types";
 import { useDelay } from "../../hooks/delay.hook";
-import { useGetLetter } from "../../hooks/get-letter.hook";
+import { useUsersChannel } from "../../users-channel.hook";
 import { UserList } from "../user-list";
 import styles from "./waiting-room.module.css";
 
-export const WaitingRoom: React.FC<{
-  context: any;
-  send: (event: any) => void;
-}> = (props) => {
+export const WaitingRoom: StateComponentType = ({ context, send }) => {
   const [copyTimeout, setCopyTimeout] = useState<number>(0);
-  const [channel, setChannel] = useState<RealtimeChannel>();
-  const { createPresenceChannel } = useCreateChannel();
-  const [gameState] = useGameState();
-  const [userState] = useUserState();
-  const getLetter = useGetLetter();
-  const delay = useDelay();
 
   useTimeoutFn(() => {
     setCopyTimeout(0);
   }, copyTimeout);
 
-  const { user, users } = userState;
-  const { roomCode } = gameState;
+  const { subscribeStatus, usersChannel } = useUsersChannel({ context, send });
 
-  useMount(() => {
-    const newChannel = createPresenceChannel("startGame");
-
-    setChannel(newChannel);
-
-    newChannel.on("presence", { event: "sync" }, () => {
-      const presenceState = newChannel.presenceState();
-
-      if (presenceState?.startGame?.[0]) {
-        const presenceGameState = presenceState.startGame[0];
-
-        props.send({
-          type: "UPDATE_MAX_ROUNDS",
-          value: parseInt(presenceGameState.rounds),
-        });
-      }
-    });
-
-    newChannel.on("broadcast", { event: "start" }, () => {
-      props.send("READY");
-    });
-
-    newChannel.subscribe();
-  });
-
-  const startGame = useCallback(async () => {
-    getLetter();
-
-    await delay();
-
-    channel?.send({
-      type: "broadcast",
-      event: "start",
-      payload: true,
-    });
-
-    props.send("READY");
-  }, [channel, delay, getLetter, props]);
+  console.log({ subscribeStatus });
 
   const copyRoomCodeToClipboard = useCallback(() => {
-    const roomLink = `${window.location.origin}?code=${roomCode}`;
+    const roomLink = `${window.location.origin}?code=${context.roomCode}`;
     navigator.clipboard.writeText(roomLink);
 
     setCopyTimeout(4000);
-  }, [roomCode]);
+  }, [context.roomCode]);
+
+  const startGame = useCallback(async () => {
+    if (
+      subscribeStatus === ChannelSubscribeStatus.SUBSCRIBED &&
+      usersChannel &&
+      context.userId
+    ) {
+      console.log("broadcast...");
+
+      await usersChannel.send({
+        type: "broadcast",
+        event: "ready",
+        payload: {
+          userId: context.userId,
+        },
+      });
+
+      send({ type: "ready" });
+    }
+  }, [context.userId, send, subscribeStatus, usersChannel]);
 
   return (
     <div>
@@ -81,7 +52,7 @@ export const WaitingRoom: React.FC<{
         <p>Your room code is:</p>
 
         <div className={styles.roomCodeContent}>
-          <p className={styles.roomCode}>{roomCode}</p>
+          <p className={styles.roomCode}>{context.roomCode}</p>
           <button
             onClick={copyRoomCodeToClipboard}
             disabled={copyTimeout !== 0}
@@ -95,11 +66,11 @@ export const WaitingRoom: React.FC<{
 
       <div className={styles.userListContainer}>
         <h2>Players in the room</h2>
-        <UserList users={users} />
+        <UserList users={context?.players ?? []} />
       </div>
 
       <div className={styles.buttonWrapper}>
-        {user?.leader ? (
+        {context.leader ? (
           <button onClick={startGame}>Start Game</button>
         ) : (
           <p>Waiting for the leader to begin the game...</p>

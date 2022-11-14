@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useInterval } from "react-use";
 
-const TIMER_VALUE = 60;
+const TIMER_VALUE = 10;
 const DELAY_VALUE = 1000;
 
 const SOUND_SRC = {
@@ -65,6 +65,7 @@ export const useTimer = () => {
   }, [endingAudio, timerAudio])
 
   return {
+    isRunning,
     seconds,
     startTimer,
     stopAndResetTimer,
