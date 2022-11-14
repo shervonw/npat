@@ -42,8 +42,6 @@ export const useUsersChannel = ({ context, send }: StateComponentProps) => {
       });
 
       channel.on("broadcast", { event: "ready" }, ({ payload }) => {
-        console.log("ready");
-
         if (payload.userId !== context.userId) {
           send({ type: "ready" });
         }

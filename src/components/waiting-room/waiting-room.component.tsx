@@ -30,8 +30,6 @@ export const WaitingRoom: StateComponentType = ({ context, send }) => {
       usersChannel &&
       context.userId
     ) {
-      console.log("broadcast...");
-
       await usersChannel.send({
         type: "broadcast",
         event: "ready",

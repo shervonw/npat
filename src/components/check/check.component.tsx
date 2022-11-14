@@ -3,15 +3,11 @@ import { useEffect } from "react";
 import { useAsync } from "react-use";
 import { ChannelSubscribeStatus, StateComponentType } from "../../app.types";
 import { useGameChannel } from "../../game-channel.hook";
-import { useDelay } from "../../hooks/delay.hook";
 
 export const Check: StateComponentType = ({ context, send }) => {
   const { gameChannel, subscribeStatus } = useGameChannel({ context, send });
-  const delay = useDelay();
 
   useAsync(async () => {
-    await delay(3000);
-
     if (
       gameChannel &&
       context.leader &&
