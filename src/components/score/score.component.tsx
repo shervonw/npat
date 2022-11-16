@@ -36,8 +36,8 @@ export const Score: StateComponentType = ({ context, send }) => {
       ([, uid2]) => uid2 === context.userId
     )?.[0];
 
-    return users.find(({ userId }) => userId === yourScorerId)?.scores ?? {};
-  }, [context.userId, scoringPartners, users]);
+    return users.find(({ userId }) => userId === yourScorerId)?.scores?.[round] ?? {};
+  }, [context.userId, round, scoringPartners, users]);
 
   const responseList = useMemo(
     () => transformReponses(users, context, playerIdToScore),
@@ -79,12 +79,12 @@ export const Score: StateComponentType = ({ context, send }) => {
   const onReadyClick = useCallback(() => {
     send({
       type: "submitScores",
-      value: Object.values<number>(yourScores?.[round] ?? {}).reduce(
+      value: Object.values<number>(yourScores).reduce(
         (total, score) => (total += score),
         0
       ),
     });
-  }, [round, send, yourScores]);
+  }, [send, yourScores]);
 
   const { loading } = useAsync(async() => {
     await delay(1000)
