@@ -1,9 +1,6 @@
 import { assign, createMachine } from "xstate";
 import { StateContext } from "./app.types";
-import {
-  createPlayer,
-  generateRoomName
-} from "./app.utils";
+import { createPlayer, generateRoomName } from "./app.utils";
 import { ALPHABET } from "./components/create-game/create-game.constants";
 
 const DEFAULT_CONTEXT = {
@@ -81,6 +78,7 @@ export const appStateMachine = createMachine<StateContext>(
         id: "Game",
         states: {
           waitingRoom: {
+            always: [{ target: "scoreboard", cond: "isAllRoundsCompleted" }],
             entry: ["readyUp"],
             on: {
               ready: {
