@@ -1,6 +1,6 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { omit } from "ramda";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "./app.context";
 import { StateComponentProps, SubscribeStatus } from "./app.types";
 import { useChannel } from "./hooks/channel.hook";
@@ -35,7 +35,13 @@ export const useUsersChannel = ({
 
       channel.on("presence", { event: "sync" }, () => {
         const presenceState = channel.presenceState();
-        updatePlayers(Object.values(presenceState).map((user) => user[0]));
+        const players = Object.values(presenceState).map((player) => player[0]);
+
+        for (const player of players) {
+          setAppContext(player.game);
+        }
+
+        updatePlayers(players);
       });
 
       channel.on("presence", { event: "leave" }, (presence) => {
@@ -72,27 +78,19 @@ export const useUsersChannel = ({
     }
   }, [context, subscribeStatus, usersChannel]);
 
-  useEffect(() => {
-    if (lastLeftPlayer && lastLeftPlayer?.leader) {
-      setLastLeftPlayer(null);
-
-      const newLeader = users?.[0];
-
-      if (newLeader?.userId === context.userId && usersChannel) {
-        usersChannel.track({ ...context, leader: true });
-        send({ type: "reAssignLeader" });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastLeftPlayer]);
-
   // useEffect(() => {
-  //   const leader = users.find((user) => user.leader && user.game);
+  //   if (lastLeftPlayer && lastLeftPlayer?.leader) {
+  //     setLastLeftPlayer(null);
 
-  //   if (leader) {
-  //     setAppContext({ type: "SET_STATE", value: leader.game || {} });
+  //     const newLeader = users?.[0];
+
+  //     if (newLeader?.userId === context.userId && usersChannel) {
+  //       usersChannel.track({ ...context, leader: true });
+  //       send({ type: "reAssignLeader" });
+  //     }
   //   }
-  // }, [setAppContext, users]);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [lastLeftPlayer]);
 
   return { subscribeStatus, users, usersChannel };
 };
