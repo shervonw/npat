@@ -38,7 +38,7 @@ export const useUsersChannel = ({
         const players = Object.values(presenceState).map((player) => player[0]);
 
         for (const player of players) {
-          setAppContext(player.game);
+          if (player.game) setAppContext(player.game);
         }
 
         updatePlayers(players);
