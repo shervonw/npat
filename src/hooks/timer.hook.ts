@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useInterval } from "react-use";
 
-const TIMER_VALUE = 10;
+const TIMER_VALUE = 60;
 const DELAY_VALUE = 1000;
 
 const SOUND_SRC = {
