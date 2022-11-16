@@ -1,8 +1,10 @@
-import { find, map, pipe, toPairs } from "ramda";
+import { RealtimePresenceState } from "@supabase/supabase-js";
+import { indexBy, map, pipe, prop, toPairs } from "ramda";
+import { StateContext } from "../../app.types";
 
 const sortUserList = (scoringId: string) => (users: any[]) => {
   const index = users.findIndex(
-    ({ user }: { user: { id: string } }) => user.id === scoringId
+    ({ user }: { user: { userId: string } }) => user.userId === scoringId
   );
 
   if (index !== -1) {
@@ -14,17 +16,20 @@ const sortUserList = (scoringId: string) => (users: any[]) => {
 };
 
 export const transformReponses = (
-  allResponses: any,
-  round: number,
+  players: StateContext[],
+  context: StateContext,
   playerIdToScore: string,
-  users: any[]
 ) => {
+  const { round, userId = "" } = context;
+
   return pipe(
-    toPairs,
-    map(([userId, responses]: [string, any]) => ({
-      responses: responses?.[round],
-      user: find((user) => userId === user.id, users),
+    map((player: StateContext) => ({
+      user: {
+        name: player.name,
+        userId: player.userId,
+      },
+      responses: player.responses?.[round] ?? {},
     })),
     sortUserList(playerIdToScore)
-  )(allResponses);
+  )(players);
 };

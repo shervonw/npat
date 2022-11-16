@@ -1,19 +1,19 @@
-import { pick } from "ramda";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAsync, useMount } from "react-use";
+import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
-import { useGameChannel } from "../../game-channel.hook";
 import { useDelay } from "../../hooks/delay.hook";
 import { useTimer } from "../../hooks/timer.hook";
+import { useUsersChannel } from "../../users-channel.hook";
 import styles from "./input-list.module.css";
 
 export const InputList: StateComponentType = ({ context, send }) => {
-  const { categories, currentLetter, maxRounds } = context.gameState;
+  const [appContext] = useAppContext();
   const { seconds, startTimer } = useTimer();
   const { register, getValues } = useForm<any>({
     mode: "onSubmit",
-    defaultValues: categories?.reduce(
+    defaultValues: appContext.categories?.reduce(
       (categoryObj, category) => ({
         ...categoryObj,
         [category]: "",
@@ -21,12 +21,37 @@ export const InputList: StateComponentType = ({ context, send }) => {
       {}
     ),
   });
+  const delay = useDelay();
 
-  // const { gameChannel } = useGameChannel({ context, send });
+  const onSubmitHandler = useCallback(async () => {
+    send({ type: "submitResponses", value: getValues() });
+  }, [getValues, send]);
+
+  const { usersChannel } = useUsersChannel({
+    context,
+    onSubmit: onSubmitHandler,
+    send,
+  });
+
+  const { categories, currentLetter, maxRounds } = appContext;
 
   useMount(() => {
     startTimer();
-  })
+  });
+
+  const onSubmitHanlder= useCallback(async () => {
+    if (usersChannel && context.userId) {
+      await usersChannel.send({
+        type: "broadcast",
+        event: "submit",
+        payload: {
+          userId: context.userId,
+        },
+      });
+
+      send({ type: "submitResponses", value: getValues() });
+    }
+  }, [context.userId, getValues, send, usersChannel]);
 
   useEffect(() => {
     if (context.leader && seconds === 0) {
@@ -35,24 +60,13 @@ export const InputList: StateComponentType = ({ context, send }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds]);
 
-  const onSubmitHanlder = useCallback(() => {
-    
-  }, [])
+  const { loading } = useAsync(async() => {
+    await delay(1000)
+  })
 
-  // const onSubmitHanlder = useCallback(async () => {
-  //   if (gameChannel && context.userId) {
-  //     await gameChannel.send({
-  //       type: "broadcast",
-  //       event: "submit",
-  //       payload: {
-  //         userId: context.userId,
-  //         values: getValues()
-  //       },
-  //     });
-
-  //     send({ type: "submitResponses", value: getValues() });
-  //   }
-  // }, [context.userId, gameChannel, getValues, send]);
+  if (loading) {
+    return <div>Starting Round...</div>
+  }
 
   return (
     <div>
@@ -86,7 +100,13 @@ export const InputList: StateComponentType = ({ context, send }) => {
         ))}
 
       <div className={styles.buttonWrapper}>
-        <button onClick={onSubmitHanlder}>Submit Response</button>
+        {!loading ? (
+          <button disabled={seconds === 0} onClick={onSubmitHanlder}>
+            Start Game
+          </button>
+        ) : (
+          <p>Submitting responses...</p>
+        )}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ export const UserList = ({
     id: string;
     emoji: string;
     name: string;
-    score?: number;
+    totalScore?: number;
     leader: boolean;
   }[];
 }) => {
@@ -20,7 +20,7 @@ export const UserList = ({
             <p>
               {user.leader && <span>👑</span>} {user.name}
             </p>
-            {user.score !== undefined && <p className={styles.score}>{user.score}</p>}
+            {user.totalScore !== undefined && <p className={styles.score}>{user.totalScore}</p>}
           </div>
         ))}
     </div>

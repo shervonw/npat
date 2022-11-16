@@ -1,16 +1,17 @@
 import type { NextPage } from "next";
 import { useAppMachine } from "../src/app-machine.hook";
+import { AppContextProvider } from "../src/app.context";
 import styles from "../styles/app.module.css";
 
 const Index: NextPage<{ code: string }> = ({ code }) => {
-  const { context, Component, send, step } = useAppMachine(code);
-
-  // console.log(context);
+  const { context, Component, send } = useAppMachine(code);
 
   return (
-    <div className={styles.container}>
-      {Component && <Component context={context} send={send} />}
-    </div>
+    <AppContextProvider>
+      <div className={styles.container}>
+        {Component && <Component context={context} send={send} />}
+      </div>
+    </AppContextProvider>
   );
 };
 

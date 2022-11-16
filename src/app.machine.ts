@@ -2,19 +2,16 @@ import { assign, createMachine } from "xstate";
 import { StateContext } from "./app.types";
 import {
   createPlayer,
-  generateRoomName,
-  generateScoringPartners,
-  startTimer,
+  generateRoomName
 } from "./app.utils";
 import { ALPHABET } from "./components/create-game/create-game.constants";
 
 const DEFAULT_CONTEXT = {
-  gameState: {
+  game: {
     maxRounds: 5,
     possibleAlphabet: ALPHABET,
   },
   round: 0,
-  timerValue: 60,
 };
 
 export const appStateMachine = createMachine<StateContext>(
@@ -82,12 +79,12 @@ export const appStateMachine = createMachine<StateContext>(
       },
       game: {
         id: "Game",
-        initial: "check",
         states: {
           waitingRoom: {
+            entry: ["readyUp"],
             on: {
               ready: {
-                target: "check",
+                target: "playing",
               },
               updatePlayers: {
                 actions: ["updatePlayers"],
@@ -97,46 +94,23 @@ export const appStateMachine = createMachine<StateContext>(
               },
             },
           },
-          check: {
-            entry: ["getLetterFromAlphabet", "incrementRounds"],
-            always: [
-              {
-                target: "scoreboard",
-                cond: "isAllRoundsCompleted",
-              },
-            ],
-            on: {
-              updateGameState: {
-                actions: ["updateGameState"],
-              },
-              play: {
-                target: "playing",
-              }
-            }
-          },
           playing: {
+            entry: ["getLetterFromAlphabet", "incrementRounds"],
             on: {
               submitResponses: {
                 target: "score",
                 actions: ["updateResponses"],
               },
-              updatePlayers: {
-                actions: ["updatePlayers"],
-              },
-              updateTimer: {
-                actions: ["updateTimer"],
-              },
             },
           },
           score: {
-            entry: ["generateScorePartners"],
             on: {
               submitScores: {
                 target: "waitingRoom",
-                actions: ["updateScores"],
+                actions: ["updateTotalScore"],
               },
-              updatePlayers: {
-                actions: ["updatePlayers", "generateScorePartners"],
+              updateScores: {
+                actions: ["updateScores"],
               },
             },
           },
@@ -159,31 +133,31 @@ export const appStateMachine = createMachine<StateContext>(
         round: (context, _) => context.round + 1,
       }),
       updateMaxRounds: assign({
-        gameState: (context, e) => ({
-          ...context.gameState,
+        game: (context, e) => ({
+          ...context.game,
           maxRounds: e.value,
         }),
       }),
       updateCategories: assign({
-        gameState: (context, e) => ({
-          ...context.gameState,
+        game: (context, e) => ({
+          ...context.game,
           categories: e.value,
         }),
       }),
       getLetterFromAlphabet: assign({
-        gameState: (context, _) => {
+        game: (context, _) => {
           if (!context?.leader) {
-            return context.gameState;
+            return context.game;
           }
 
-          const alphabet = context.gameState.possibleAlphabet.slice();
+          const alphabet = context.game.possibleAlphabet.slice();
 
           alphabet.sort(() => 0.5 - Math.random());
 
           const letter = alphabet.shift();
 
           return {
-            ...context.gameState,
+            ...context.game,
             currentLetter: letter,
             possibleAlphabet: alphabet,
           };
@@ -192,58 +166,37 @@ export const appStateMachine = createMachine<StateContext>(
       createLeader: assign((_, e) => createPlayer(e.value, true)),
       createPlayer: assign((_, e) => createPlayer(e.value)),
       updateResponses: assign({
-        gameState: (context, e) => ({
-          ...context.gameState,
-          responses: {
-            ...context.gameState.responses,
-            [context.round]: e.value,
-          },
+        responses: (context, e) => ({
+          ...context.responses,
+          [context.round]: e.value,
         }),
       }),
       updateScores: assign({
-        gameState: (context, e) => ({
-          ...context.gameState,
-          scores: {
-            ...context.gameState.scores,
-            [context.round]: e.value,
-          },
+        scores: (context, e) => ({
+          ...context.scores,
+          [context.round]: e.value,
         }),
-      }),
-      generateScorePartners: assign({
-        gameState: (context: StateContext, __) => ({
-          ...context.gameState,
-          scoringPartners: generateScoringPartners(
-            (context?.players ?? []).map((user) => user.id)
-          ),
-        }),
-      }),
-      updatePlayers: assign({
-        players: (_, e) => e.value,
       }),
       resetContext: assign(() => DEFAULT_CONTEXT),
-      updateGameState: assign({
-        gameState: (_, e) => e.value,
+      updategame: assign({
+        game: (_, e) => e.value,
       }),
       assignPlayerAsLeader: assign({
         leader: (c, e) => true,
       }),
-      resetTimer: assign({
-        timerValue: (c, e) => 60,
+      updateTotalScore: assign({
+        totalScore: (context, e) => (context.totalScore || 0) + e.value,
       }),
-      updateTimer: assign({
-        timerValue: (_, e) => e.value,
-      }),
-      addPlayer: assign({
-        players: (context, e) => [...(context?.players ?? []), e.value],
-      }),
-      removePlayer: assign({
-        players: (context, e) =>
-          (context?.players ?? []).filter((player) => player.id !== e.value),
+      readyUp: assign({
+        ready: (context, e) => ({
+          ...context.ready,
+          [context.round]: true,
+        }),
       }),
     },
     guards: {
       checkForRoomCode: (ctx) => !!ctx.roomCode,
-      isAllRoundsCompleted: (ctx) => ctx.round === ctx.gameState.maxRounds,
+      isAllRoundsCompleted: (ctx) => ctx.round === ctx.game.maxRounds,
     },
   }
 );

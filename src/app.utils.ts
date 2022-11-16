@@ -13,7 +13,7 @@ const getRandomNumber: GetRandomNumberFn = ({ min = 0, max = 99 } = {}) =>
 
 export const startTimer = (context: StateContext) =>
   new Promise((resolve, reject) => {
-    const count = context.timerValue -= 1;
+    const count = 0;
 
     setInterval(() => {
       if (count <= 0) {

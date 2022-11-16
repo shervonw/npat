@@ -28,6 +28,11 @@
   font-size: 1.5rem;
 }
 
-.buttonWrapper > button {
+.buttonWrapper > button,
+.buttonWrapper > p {
   margin: 0 auto 1rem;
+}
+
+.buttonWrapper > p {
+  width: fit-content;
 }
