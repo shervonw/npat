@@ -1,0 +1,39 @@
+.scoreTable {
+  margin: 1rem;
+}
+
+.scoreboardItem,
+.scoreboardItemHighlight {
+  display: grid;
+  grid-template-columns: 1.5rem auto 2.5rem;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+.scoreboardItem > div,
+.scoreboardItemHighlight > div {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.scoreboardItem > div:first-child,
+.scoreboardItemHighlight > div:first-child {
+  flex-basis: 2rem;
+}
+.scoreboardItem > div:nth-child(2),
+.scoreboardItemHighlight > div:nth-child(2) {
+  flex-grow: 1;
+  padding: 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+.scoreboardItem > div:last-child,
+.scoreboardItemHighlight > div:last-child {
+  flex-basis: 6.25rem;
+  text-align: center;
+}
+
+.scoreboardItemHighlight {
+  background-color: lightskyblue;
+}
+
+.buttonWrapper > button {
+  margin: 1.5rem auto 0;
+}

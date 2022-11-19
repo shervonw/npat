@@ -1,19 +1,28 @@
+import { pick } from "ramda";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useAsync, useMount } from "react-use";
+import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
+import { getLetterFromAlphabet } from "../../app.utils";
 import { useDelay } from "../../hooks/delay.hook";
 import { useTimer } from "../../hooks/timer.hook";
-import { useUsersChannel } from "../../users-channel.hook";
 import styles from "./input-list.module.css";
 
-export const InputList: StateComponentType = ({ context, send }) => {
-  const [appContext] = useAppContext();
-  const { seconds, startTimer } = useTimer();
+export const InputList: StateComponentType = ({
+  channel,
+  context,
+  isSubscribed,
+  send,
+}) => {
+  const delay = useDelay();
+  const [appContext, setAppContext] = useAppContext();
+  const { categories, currentLetter } = appContext;
+
+  const { isRunning: isTimerRunning, seconds, startTimer } = useTimer();
   const { register, getValues } = useForm<any>({
     mode: "onSubmit",
-    defaultValues: appContext.categories?.reduce(
+    defaultValues: (categories ?? []).reduce(
       (categoryObj, category) => ({
         ...categoryObj,
         [category]: "",
@@ -21,37 +30,64 @@ export const InputList: StateComponentType = ({ context, send }) => {
       {}
     ),
   });
-  const delay = useDelay();
 
-  const onSubmitHandler = useCallback(async () => {
-    send({ type: "submitResponses", value: getValues() });
-  }, [getValues, send]);
+  const { loading } = useAsync(async () => {
+    await delay();
 
-  const { usersChannel } = useUsersChannel({
-    context,
-    onSubmit: onSubmitHandler,
-    send,
-  });
+    if (channel && context.leader) {
 
-  const { categories, currentLetter, maxRounds } = appContext;
+      const letter = getLetterFromAlphabet(appContext.possibleAlphabet);
 
-  useMount(() => {
-    startTimer();
-  });
+      setAppContext({ type: "newLetter", value: letter });
 
-  const onSubmitHanlder= useCallback(async () => {
-    if (usersChannel && context.userId) {
-      await usersChannel.send({
+      await channel.send({
+        type: "broadcast",
+        event: "start",
+        payload: {
+          ...pick(["categories", "maxRounds"], appContext),
+          letter,
+        },
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (channel && isSubscribed) {
+      channel.on("broadcast", { event: "submit" }, () => {
+        setAppContext({
+          type: "allResponses",
+          value: {
+            round: context.round,
+            userId: context.userId,
+            values: getValues(),
+          },
+        });
+
+        send({ type: "submitResponses" });
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel, isSubscribed, send]);
+
+  const onSubmitHanlder = useCallback(async () => {
+    if (channel) {
+      await channel.send({
         type: "broadcast",
         event: "submit",
-        payload: {
+      });
+
+      setAppContext({
+        type: "allResponses",
+        value: {
+          round: context.round,
           userId: context.userId,
+          values: getValues(),
         },
       });
 
-      send({ type: "submitResponses", value: getValues() });
+      send({ type: "submitResponses" });
     }
-  }, [context.userId, getValues, send, usersChannel]);
+  }, [channel, context.round, context.userId, getValues, send, setAppContext]);
 
   useEffect(() => {
     if (context.leader && seconds === 0) {
@@ -60,12 +96,15 @@ export const InputList: StateComponentType = ({ context, send }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds]);
 
-  const { loading } = useAsync(async() => {
-    await delay(1000)
-  })
+  useEffect(() => {
+    if (categories && currentLetter && !isTimerRunning) {
+      startTimer();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories, currentLetter, isTimerRunning]);
 
   if (loading) {
-    return <div>Starting Round...</div>
+    return <div>Starting Round...</div>;
   }
 
   return (
@@ -75,7 +114,7 @@ export const InputList: StateComponentType = ({ context, send }) => {
           <h2>
             Round:{" "}
             <span>
-              #{context.round}/{maxRounds}
+              #{context.round}/{context.maxRounds}
             </span>
           </h2>
           <h2>
@@ -100,13 +139,9 @@ export const InputList: StateComponentType = ({ context, send }) => {
         ))}
 
       <div className={styles.buttonWrapper}>
-        {!loading ? (
-          <button disabled={seconds === 0} onClick={onSubmitHanlder}>
-            Submit
-          </button>
-        ) : (
-          <p>Submitting responses...</p>
-        )}
+        <button disabled={seconds === 0} onClick={onSubmitHanlder}>
+          Submit
+        </button>
       </div>
     </div>
   );

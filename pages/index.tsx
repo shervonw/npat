@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useAppMachine } from "../src/app-machine.hook";
-import { AppContextProvider } from "../src/app.context";
+import { useAppChannel } from "../src/app.hook";
 import { useWakeLock } from "../src/wake-lock.hook";
 import styles from "../styles/app.module.css";
 
@@ -9,12 +9,23 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
 
   useWakeLock();
 
+  const { channel, isSubscribed, players } = useAppChannel({
+    context,
+    send,
+  });
+
   return (
-    <AppContextProvider>
-      <div className={styles.container}>
-        {Component && <Component context={context} send={send} />}
-      </div>
-    </AppContextProvider>
+    <div className={styles.container}>
+      {Component && (
+        <Component
+          channel={channel}
+          context={context}
+          isSubscribed={isSubscribed}
+          players={players}
+          send={send}
+        />
+      )}
+    </div>
   );
 };
 

@@ -1,0 +1,16 @@
+.container > h1 {
+  margin-top: 0;
+}
+
+.container > h1 {
+  text-align: center;
+}
+
+.buttonWrapper > button,
+.buttonWrapper > p {
+  margin: 0 auto 1rem;
+}
+
+.buttonWrapper > p {
+  width: fit-content;
+}

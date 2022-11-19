@@ -1,16 +1,12 @@
 import { useCallback, useState } from "react";
 import styles from "./number-input.module.css"
+import { NumberInputProps } from "./number-input.types";
 
-export const NumberInput = ({
+export const NumberInput: React.FC<NumberInputProps> = ({
   category,
   currentScore,
   setCurrentScore,
   value,
-}: {
-  category: string;
-  currentScore: Record<string, number>;
-  setCurrentScore: (score: Record<string, number>) => void;
-  value: number;
 }) => {
   const [numberValue, setNumberValue] = useState(value);
   const onMinus = useCallback(() => {

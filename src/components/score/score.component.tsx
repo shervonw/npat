@@ -5,93 +5,139 @@ import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
 import { generateScoringPartners } from "../../app.utils";
 import { useDelay } from "../../hooks/delay.hook";
-import { useUsersChannel } from "../../users-channel.hook";
-import { NumberInput } from "./number-input";
+import { ScoreCardBody } from "./card-body";
+import { ScoreCardHeader } from "./card-header";
 import styles from "./score.module.css";
 import { transformReponses } from "./score.utils";
 
-export const Score: StateComponentType = ({ context, send }) => {
-  const [appContext] = useAppContext();
+export const Score: StateComponentType = ({
+  channel,
+  context,
+  players,
+  send,
+}) => {
+  const [appContext, setAppContext] = useAppContext();
   const { round, userId = "" } = context;
-  const { users } = useUsersChannel({
-    context,
-    send,
-  });
   const delay = useDelay();
 
-  const { categories } = appContext;
+  const { allResponses, categories = [] } = appContext;
+
+  const userResponseForRound = useMemo(() => {
+    return allResponses[round]?.[userId];
+  }, [allResponses, round, userId]);
+
+  const { loading } = useAsync(async () => {
+    await delay(1000);
+  }, []);
+
+  useEffect(() => {
+    if (!loading && channel && userResponseForRound) {
+      channel.send({
+        type: "broadcast",
+        event: "responses",
+        payload: {
+          userId,
+          round,
+          values: userResponseForRound,
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel, loading, userResponseForRound]);
 
   const scoringPartners = useMemo(() => {
-    return generateScoringPartners(users.map(({ userId }) => userId));
-  }, [users]);
+    return generateScoringPartners(
+      players.map((player) => player?.userId ?? "")
+    );
+  }, [players]);
 
-  const [currentScore, setCurrentScore] = useState<Record<string, number>>();
+  const [currentScore, setCurrentScore] = useState<Record<string, number>>({});
 
   const playerIdToScore = useMemo(() => {
     return scoringPartners?.[userId];
   }, [scoringPartners, userId]);
 
-  const yourScores = useMemo(() => {
-    const yourScorerId = Object.entries(scoringPartners).find(
-      ([, uid2]) => uid2 === context.userId
-    )?.[0];
-
-    return users.find(({ userId }) => userId === yourScorerId)?.scores?.[round] ?? {};
-  }, [context.userId, round, scoringPartners, users]);
-
-  const responseList = useMemo(
-    () => transformReponses(users, context, playerIdToScore),
-    [context, playerIdToScore, users]
+  const allResponsesForRound = useMemo(
+    () => allResponses[context.round] ?? {},
+    [allResponses, context.round]
   );
 
-  const similarityCheck = useCallback(
-    (category: string, currentUserId: string) => {
-      const { responses: currentResponses = {} } =
-        responseList.find(({ user }) => user.userId === currentUserId) || {};
+  const responseList = useMemo(() => {
+    return transformReponses(allResponsesForRound, playerIdToScore, players);
+  }, [allResponsesForRound, playerIdToScore, players]);
 
-      const currentUserResponse = currentResponses?.[category]
-        ? currentResponses[category].toLowerCase().trim()
+  const similarityCheck = useCallback(
+    (userId: string) => (category: string) => {
+      const currentUserResponse = allResponsesForRound?.[userId]?.[category];
+      const currentUserResponseValue = currentUserResponse
+        ? currentUserResponse.toLowerCase().trim()
         : null;
 
-      return responseList
-        .filter(({ user }) => user.userId !== currentUserId)
-        .some(({ responses = {} } = {}) => {
-          const otherResponse = responses?.[category]
-            ? responses[category].toLowerCase().trim()
+      return Object.entries(allResponsesForRound)
+        .filter(([currentUserId]) => userId !== currentUserId)
+        .some(([, responses]: [string, Record<string, string>]) => {
+          const otherResponse = responses?.[category];
+          const otherResponseValue = otherResponse
+            ? otherResponse.toLowerCase().trim()
             : null;
 
           return (
-            currentUserResponse &&
-            otherResponse &&
-            currentUserResponse === otherResponse
+            currentUserResponseValue &&
+            otherResponseValue &&
+            currentUserResponseValue === otherResponseValue
           );
         });
     },
-    [responseList]
+    [allResponsesForRound]
   );
 
   useEffect(() => {
-    if (!isEmpty(currentScore)) {
-      send({ type: "updateScores", value: currentScore });
-    }
-  }, [currentScore, send]);
+    const playerToScoreResponses = allResponsesForRound[playerIdToScore];
 
-  const onReadyClick = useCallback(() => {
-    send({
-      type: "submitScores",
-      value: Object.values<number>(yourScores).reduce(
+    if (isEmpty(currentScore) && playerToScoreResponses) {
+      const initialScores = Object.entries(playerToScoreResponses).reduce((scores, [category]) => {
+        const isSimilar = similarityCheck(playerIdToScore)(category);
+
+        return {
+          ...scores,
+          [category]: isSimilar ? 5 : 0,
+        }
+      }, {});
+
+      setCurrentScore(initialScores);
+    }
+  }, [allResponsesForRound, currentScore, playerIdToScore, similarityCheck]);
+
+  const onReadyClick = useCallback(async () => {
+    if (channel) {
+      const totalScore = Object.values<number>(currentScore).reduce(
         (total, score) => (total += score),
         0
-      ),
-    });
-  }, [send, yourScores]);
+      );
 
-  const { loading } = useAsync(async() => {
-    await delay(1000)
-  })
+      const payload = {
+        round: context.round,
+        score: totalScore,
+        userId: playerIdToScore,
+      }
+
+      await channel.send({
+        type: "broadcast",
+        event: "score",
+        payload,
+      });
+
+      setAppContext({
+        type: "allScores",
+        value: payload,
+      });
+
+      send({ type: "submitScores" });
+    }
+  }, [channel, context.round, currentScore, playerIdToScore, send, setAppContext]);
 
   if (loading) {
-    return <div>Submit Responses...</div>
+    return <div>Submit Responses...</div>;
   }
 
   return (
@@ -102,50 +148,32 @@ export const Score: StateComponentType = ({ context, send }) => {
         <span>- means duplicate answer</span>
       </div>
       {responseList.map(({ user, responses }, userIndex) => {
-        const isScoring = user.userId === playerIdToScore;
+        const currentUserId = user.userId ?? "";
+        const isScoring = currentUserId === playerIdToScore;
+        const similarCheckFn = similarityCheck(currentUserId);
 
         return (
           <>
             <div key={userIndex} className={styles.card}>
-              <h2>
-                {isScoring ? (
-                  <span>
-                    You&apos;re scoring for <span>{user.name}</span>
-                  </span>
-                ) : context.userId === user.userId ? (
-                  "Your response"
-                ) : (
-                  `${user.name}'s response`
-                )}
-              </h2>
+              <ScoreCardHeader
+                isCurrentUser={context.userId === currentUserId}
+                isScoring={isScoring}
+                name={user.name || ""}
+              />
               <div className={styles.scoreLayout}>
-                {categories &&
-                  categories.map((category: any) => {
-                    const similar = similarityCheck(category, user.userId);
-                    const response = responses?.[category];
-                    const key = `${user.userId}-${category}`;
-                    const similarStyle = similar
-                      ? styles.scoreListItemHighlight
-                      : "";
-
-                    return (
-                      <div key={key} className={styles.scoreListItem}>
-                        <p className={similarStyle}>
-                          {category}: {response || "-"}
-                        </p>
-                        {response && isScoring && (
-                          <div>
-                            <NumberInput
-                              category={category}
-                              currentScore={currentScore || {}}
-                              setCurrentScore={setCurrentScore}
-                              value={similar ? 5 : 0}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                {categories.map((category) => {
+                  return (
+                    <ScoreCardBody
+                      key={`${currentUserId}-${category}`}
+                      category={category}
+                      currentScore={currentScore || {}}
+                      isScoring={isScoring}
+                      isSimilar={similarCheckFn(category)}
+                      response={responses?.[category]}
+                      setCurrentScore={setCurrentScore}
+                    />
+                  );
+                })}
               </div>
             </div>
             {userIndex === 0 && (

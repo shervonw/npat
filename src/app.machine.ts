@@ -1,18 +1,15 @@
 import { assign, createMachine } from "xstate";
 import { StateContext } from "./app.types";
 import { createPlayer, generateRoomName } from "./app.utils";
-import { ALPHABET } from "./components/create-game/create-game.constants";
 
 const DEFAULT_CONTEXT = {
-  game: {
-    maxRounds: 5,
-    possibleAlphabet: ALPHABET,
-  },
+  maxRounds: 5,
   round: 0,
 };
 
 export const appStateMachine = createMachine<StateContext>(
   {
+    preserveActionOrder: true,
     predictableActionArguments: true,
     id: "npat-game",
     initial: "initial",
@@ -78,42 +75,39 @@ export const appStateMachine = createMachine<StateContext>(
         id: "Game",
         states: {
           waitingRoom: {
-            always: [{ target: "scoreboard", cond: "isAllRoundsCompleted" }],
-            entry: ["readyUp"],
             on: {
-              ready: {
+              start: {
                 target: "playing",
-              },
-              updatePlayers: {
-                actions: ["updatePlayers"],
-              },
-              reAssignLeader: {
-                actions: ["reAssignLeader"],
+                actions: ["incrementRounds"],
               },
             },
           },
           playing: {
-            entry: ["getLetterFromAlphabet", "incrementRounds"],
+            always: [{ target: "scoreboard", cond: "isAllRoundsCompleted" }],
             on: {
               submitResponses: {
                 target: "score",
-                actions: ["updateResponses"],
               },
             },
           },
           score: {
             on: {
               submitScores: {
-                target: "waitingRoom",
-                actions: ["updateTotalScore"],
+                target: "scoreReview",
               },
-              updateScores: {
-                actions: ["updateScores"],
+            },
+          },
+          scoreReview: {
+            entry: ["readyUp"],
+            on: {
+              start: {
+                target: "playing",
+                actions: ["incrementRounds"],
               },
             },
           },
           scoreboard: {
-            exit: assign({ rounds: 0 }),
+            exit: assign({ maxRounds: 5, rounds: 0 }),
           },
         },
       },
@@ -127,64 +121,18 @@ export const appStateMachine = createMachine<StateContext>(
       updateRoomCode: assign({
         roomCode: (_, e) => e.value,
       }),
+      assignRoomCode: assign({
+        roomCode: (_, e) => e.value,
+      }),
       incrementRounds: assign({
         round: (context, _) => context.round + 1,
       }),
       updateMaxRounds: assign({
-        game: (context, e) => ({
-          ...context.game,
-          maxRounds: e.value,
-        }),
-      }),
-      updateCategories: assign({
-        game: (context, e) => ({
-          ...context.game,
-          categories: e.value,
-        }),
-      }),
-      getLetterFromAlphabet: assign({
-        game: (context, _) => {
-          if (!context?.leader) {
-            return context.game;
-          }
-
-          const alphabet = context.game.possibleAlphabet.slice();
-
-          alphabet.sort(() => 0.5 - Math.random());
-
-          const letter = alphabet.shift();
-
-          return {
-            ...context.game,
-            currentLetter: letter,
-            possibleAlphabet: alphabet,
-          };
-        },
+        maxRounds: (c, e) => e.value,
       }),
       createLeader: assign((_, e) => createPlayer(e.value, true)),
       createPlayer: assign((_, e) => createPlayer(e.value)),
-      updateResponses: assign({
-        responses: (context, e) => ({
-          ...context.responses,
-          [context.round]: e.value,
-        }),
-      }),
-      updateScores: assign({
-        scores: (context, e) => ({
-          ...context.scores,
-          [context.round]: e.value,
-        }),
-      }),
       resetContext: assign(() => DEFAULT_CONTEXT),
-      updategame: assign({
-        game: (_, e) => e.value,
-      }),
-      assignPlayerAsLeader: assign({
-        leader: (c, e) => true,
-      }),
-      updateTotalScore: assign({
-        totalScore: (context, e) => (context.totalScore || 0) + e.value,
-      }),
       readyUp: assign({
         ready: (context, e) => ({
           ...context.ready,
@@ -194,7 +142,7 @@ export const appStateMachine = createMachine<StateContext>(
     },
     guards: {
       checkForRoomCode: (ctx) => !!ctx.roomCode,
-      isAllRoundsCompleted: (ctx) => ctx.round === ctx.game.maxRounds,
+      isAllRoundsCompleted: (ctx) => ctx.round === ctx.maxRounds,
     },
   }
 );

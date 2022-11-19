@@ -1,35 +1,32 @@
-import { RealtimePresenceState } from "@supabase/supabase-js";
 import { indexBy, map, pipe, prop, toPairs } from "ramda";
 import { StateContext } from "../../app.types";
 
-const sortUserList = (scoringId: string) => (users: any[]) => {
-  const index = users.findIndex(
-    ({ user }: { user: { userId: string } }) => user.userId === scoringId
-  );
+export const sortUserList = (scoringId: string) => (allResponses: [string, any][]) => {
+  const index = allResponses.findIndex(([userId]) => userId === scoringId);
 
   if (index !== -1) {
-    const first = users.splice(index, 1)[0];
-    users.unshift(first);
-    return users;
+    const allResponsesCopy = allResponses.slice();
+    const first = allResponsesCopy.splice(index, 1)[0];
+    allResponsesCopy.unshift(first);
+    return allResponsesCopy;
   }
-  return users;
+
+  return allResponses;
 };
 
 export const transformReponses = (
-  players: StateContext[],
-  context: StateContext,
+  allResponses: Record<string, any> = {},
   playerIdToScore: string,
+  players: StateContext[],
 ) => {
-  const { round, userId = "" } = context;
+  const playersIndexByUserId = indexBy(prop("userId"), players);
 
   return pipe(
-    map((player: StateContext) => ({
-      user: {
-        name: player.name,
-        userId: player.userId,
-      },
-      responses: player.responses?.[round] ?? {},
+    toPairs,
+    sortUserList(playerIdToScore),
+    map(([userId, responses]) => ({
+      user: playersIndexByUserId[userId],
+      responses,
     })),
-    sortUserList(playerIdToScore)
-  )(players);
+  )(allResponses)
 };

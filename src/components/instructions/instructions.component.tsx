@@ -35,7 +35,7 @@ export const Instructions: React.FC<{
         for each non-unique answer +0 points for no answer
       </p>
 
-      <button onClick={() => props.send("BACK")}>Back</button>
+      <button onClick={() => props.send({ type: "back" })}>Back</button>
     </div>
   );
 };

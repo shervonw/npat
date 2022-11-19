@@ -1,29 +1,20 @@
 import React, { useCallback, useMemo } from "react";
-import { useGameState, useUserState } from "../../context";
-import { calculateTotalScore, sortByScore } from "../../utils";
+import { StateComponentType } from "../../app.types";
+import { sortByScore } from "../score-table/score-table.utils";
 import styles from "./scoreboard.module.css";
 
-export const Scoreboard: React.FC = () => {
-  const [gameState] = useGameState();
-  const [userState] = useUserState();
+export const Scoreboard: StateComponentType = ({ context, players, send }) => {
+  const { userId = "" } = context;
 
-  const { user: currentUser, users } = userState;
-
-  const usersWithScore = useMemo(
-    () =>
-      sortByScore(
-        users.slice().map((user: any) => ({
-          ...user,
-          score: calculateTotalScore(user, gameState.allScores),
-        }))
-      ),
+  const sortedPlayers = useMemo(
+    () => sortByScore(players),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const position = useMemo(
-    () => usersWithScore.findIndex((user) => user.id === currentUser.id),
-    [currentUser.id, usersWithScore]
+    () => sortedPlayers.findIndex((player) => player.userId === userId),
+    [sortedPlayers, userId]
   );
 
   const resetGame = useCallback(() => {
@@ -37,7 +28,9 @@ export const Scoreboard: React.FC = () => {
         <h2>
           <span>⭐</span>
           <span>
-            Congratulations,<br />you won!
+            Congratulations,
+            <br />
+            you won!
           </span>
           <span>🏆</span>
         </h2>
@@ -54,17 +47,17 @@ export const Scoreboard: React.FC = () => {
           <div className={styles.name}>Name</div>
           <div className={styles.finalScore}>Score</div>
         </div>
-        {usersWithScore.map((user, index) => {
+        {sortedPlayers.map((player, index) => {
           const scoreboardItemStyles =
             position === index
               ? styles.scoreboardItemHighlight
               : styles.scoreboardItem;
 
           return (
-            <div key={user.id} className={scoreboardItemStyles}>
+            <div key={player.id} className={scoreboardItemStyles}>
               <div className={styles.position}>{index + 1}.</div>
-              <div className={styles.name}>{user.name}</div>
-              <div className={styles.finalScore}>{user.score}</div>
+              <div className={styles.name}>{player.name}</div>
+              <div className={styles.finalScore}>{player.totalScore}</div>
             </div>
           );
         })}

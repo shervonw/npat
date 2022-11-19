@@ -1,26 +1,20 @@
+import { StateContext } from "../../app.types";
 import styles from "./user-list.module.css";
 
 export const UserList = ({
-  users,
+  players,
 }: {
-  users: {
-    id: string;
-    emoji: string;
-    name: string;
-    totalScore?: number;
-    leader: boolean;
-  }[];
+  players: StateContext[];
 }) => {
   return (
     <div className={styles.userList}>
-      {users &&
-        users.map((user) => (
-          <div key={user.id}>
-            <div className={styles.emoji}>{user.emoji}</div>
+      {players &&
+        players.map((player) => (
+          <div key={player.userId}>
+            <div className={styles.emoji}>{player.emoji}</div>
             <p>
-              {user.leader && <span>👑</span>} {user.name}
+              {player.leader && <span>👑</span>} {player.name}
             </p>
-            {user.totalScore !== undefined && <p className={styles.score}>{user.totalScore}</p>}
           </div>
         ))}
     </div>

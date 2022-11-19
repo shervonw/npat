@@ -4,25 +4,11 @@ import {
   animals,
   uniqueNamesGenerator,
 } from "unique-names-generator";
-import { StateContext } from "./app.types";
 import { EMOJIS } from "./constants";
 
 type GetRandomNumberFn = (input?: { min?: number; max?: number }) => number;
 const getRandomNumber: GetRandomNumberFn = ({ min = 0, max = 99 } = {}) =>
   Math.floor(Math.random() * (max - min) + min);
-
-export const startTimer = (context: StateContext) =>
-  new Promise((resolve, reject) => {
-    const count = 0;
-
-    setInterval(() => {
-      if (count <= 0) {
-        resolve("done");
-      } else {
-        reject(count);
-      }
-    }, 1000);
-  });
 
 export const getEmoji = (excludeList: any[] = []) => {
   const uniqueEmojiList = EMOJIS.filter(
@@ -61,22 +47,35 @@ export const generateScoringPartners = (users: string[]) => {
   if (users.length >= 2) {
     const userList1 = users.slice();
     const userList2 = userList1.slice();
-  
+
     while (true) {
       userList1.sort(() => 0.5 - Math.random());
       userList2.sort(() => 0.5 - Math.random());
-  
+
       const hasCollision = doesAnyPairCollide(userList1, userList2);
-  
+
       if (!hasCollision) {
         break;
       }
     }
 
     return zipObj(userList1, userList2);
-  } 
+  }
 
   return {
     [users[0]]: users[0],
-  }
+  };
+};
+
+export const getLetterFromAlphabet = (alphabet: string[]) => {
+  const alphabetCopy = alphabet.slice();
+
+  alphabetCopy.sort(() => 0.5 - Math.random());
+
+  const letter = alphabetCopy.shift();
+
+  return {
+    currentLetter: letter,
+    possibleAlphabet: alphabetCopy,
+  };
 };
