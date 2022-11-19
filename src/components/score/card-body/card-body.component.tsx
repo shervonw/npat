@@ -1,3 +1,4 @@
+import { isEmpty, not } from "ramda";
 import { NumberInput } from "../number-input";
 import { NumberInputProps } from "../number-input/number-input.types";
 import styles from "../score.module.css";
@@ -24,11 +25,11 @@ export const ScoreCardBody: React.FC<ScoreCardBodyProps> = ({
         {category}: {response || "-"}
       </p>
 
-      {isScoring && response && (
+      {isScoring && response && not(isEmpty(currentScore)) && (
         <div>
           <NumberInput
             category={category}
-            currentScore={currentScore || {}}
+            currentScore={currentScore}
             setCurrentScore={setCurrentScore}
             value={currentScore?.[category] ?? 0}
           />

@@ -1,4 +1,3 @@
-import { RealtimeChannel } from "@supabase/supabase-js";
 import { omit } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppContext } from "./app.context";
@@ -13,7 +12,7 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
   const [players, setPlayers] = useState<StateContext[]>([]);
   const [lastLeftPlayer, setLastLeftPlayer] = useState<any>(null);
-  const [appContext, setAppContext] = useAppContext();
+  const [, setAppContext] = useAppContext();
 
   const channel = useMemo(() => {
     if (context.roomCode && context.userId) {

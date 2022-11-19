@@ -142,7 +142,7 @@ export const appStateMachine = createMachine<StateContext>(
     },
     guards: {
       checkForRoomCode: (ctx) => !!ctx.roomCode,
-      isAllRoundsCompleted: (ctx) => ctx.round === ctx.maxRounds,
+      isAllRoundsCompleted: (ctx) => ctx.round > ctx.maxRounds,
     },
   }
 );

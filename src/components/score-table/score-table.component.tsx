@@ -13,7 +13,7 @@ interface ScoreTableProps {
 export const ScoreTable: React.FC<ScoreTableProps> = ({
   position,
   players,
-  showPosition,
+  showPosition = true,
 }) => {
   return (
     <div className={styles.scoreTable}>

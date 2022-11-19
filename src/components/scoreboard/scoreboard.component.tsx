@@ -13,6 +13,7 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const staticPlayers = useMemo(() => playersWithScore, []);
 
+  // TODO: Fix when score are tied. Ensure they have correct positioning
   const winner = useMemo(() => {
     const allEqual = pipe(
       pluck("score"),

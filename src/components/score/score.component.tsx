@@ -166,7 +166,7 @@ export const Score: StateComponentType = ({
                     <ScoreCardBody
                       key={`${currentUserId}-${category}`}
                       category={category}
-                      currentScore={currentScore || {}}
+                      currentScore={currentScore}
                       isScoring={isScoring}
                       isSimilar={similarCheckFn(category)}
                       response={responses?.[category]}
