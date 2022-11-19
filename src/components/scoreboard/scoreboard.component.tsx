@@ -1,21 +1,28 @@
+import { all, equals, pipe, pluck } from "ramda";
 import React, { useCallback, useMemo } from "react";
 import { StateComponentType } from "../../app.types";
+import { ScoreTable, usePlayersWithScore } from "../score-table";
 import { sortByScore } from "../score-table/score-table.utils";
 import styles from "./scoreboard.module.css";
 
-export const Scoreboard: StateComponentType = ({ context, players, send }) => {
+export const Scoreboard: StateComponentType = ({ context, players }) => {
   const { userId = "" } = context;
 
-  const sortedPlayers = useMemo(
-    () => sortByScore(players),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const { playersWithScore, position } = usePlayersWithScore(userId, players);
 
-  const position = useMemo(
-    () => sortedPlayers.findIndex((player) => player.userId === userId),
-    [sortedPlayers, userId]
-  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const staticPlayers = useMemo(() => playersWithScore, []);
+
+  const winner = useMemo(() => {
+    const allEqual = pipe(
+      pluck("score"),
+      all(equals(staticPlayers[0].score))
+    )(staticPlayers);
+
+    if (!allEqual) {
+      return staticPlayers[0].userId;
+    }
+  }, [staticPlayers]);
 
   const resetGame = useCallback(() => {
     location.reload();
@@ -24,44 +31,37 @@ export const Scoreboard: StateComponentType = ({ context, players, send }) => {
   return (
     <div className={styles.container}>
       <h1>Final Scores</h1>
-      {position === 0 ? (
-        <h2>
-          <span>⭐</span>
-          <span>
-            Congratulations,
-            <br />
-            you won!
-          </span>
-          <span>🏆</span>
-        </h2>
-      ) : (
-        <h2>
-          <span></span>
-          <span>You placed #{position + 1}</span>
-          <span></span>
-        </h2>
-      )}
-      <div className={styles.scoreTable}>
-        <div key="header" className={styles.scoreboardItem}>
-          <div className={styles.position} />
-          <div className={styles.name}>Name</div>
-          <div className={styles.finalScore}>Score</div>
-        </div>
-        {sortedPlayers.map((player, index) => {
-          const scoreboardItemStyles =
-            position === index
-              ? styles.scoreboardItemHighlight
-              : styles.scoreboardItem;
+      <h2>
+        {winner === userId ? (
+          <>
+            <span>⭐</span>
+            <span>
+              Congratulations,
+              <br />
+              you won!
+            </span>
+            <span>🏆</span>
+          </>
+        ) : winner === undefined ? (
+          <>
+            <span></span>
+            <span>It&apos;s a tie 👔</span>
+            <span></span>
+          </>
+        ) : (
+          <>
+            <span></span>
+            <span>You placed #{position + 1}</span>
+            <span></span>
+          </>
+        )}
+      </h2>
 
-          return (
-            <div key={player.id} className={scoreboardItemStyles}>
-              <div className={styles.position}>{index + 1}.</div>
-              <div className={styles.name}>{player.name}</div>
-              <div className={styles.finalScore}>{player.totalScore}</div>
-            </div>
-          );
-        })}
-      </div>
+      <ScoreTable
+        players={staticPlayers}
+        position={position}
+        showPosition={Boolean(winner)}
+      />
 
       <div className={styles.buttonWrapper}>
         <button onClick={resetGame}>New Game</button>

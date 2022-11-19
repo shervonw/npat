@@ -3,7 +3,7 @@ import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
 import { useDelay } from "../../hooks/delay.hook";
-import { ScoreTable } from "../score-table";
+import { ScoreTable, usePlayersWithScore } from "../score-table";
 import styles from "./score-review.module.css";
 
 export const ScoreReview: StateComponentType = ({
@@ -61,6 +61,8 @@ export const ScoreReview: StateComponentType = ({
     send({ type: "start" });
   }, [channel, send]);
 
+  const { playersWithScore, position } = usePlayersWithScore(userId, players);  
+
   if (loading) {
     return <div>Submitting scores...</div>;
   }
@@ -75,7 +77,7 @@ export const ScoreReview: StateComponentType = ({
           : "Waiting for all players to finish scoring..."}
       </h3>
 
-      <ScoreTable currentUserId={context.userId ?? ""} players={players} />
+      <ScoreTable players={playersWithScore} position={position} />
 
       <div className={styles.buttonWrapper}>
         {context.leader && allReady && (

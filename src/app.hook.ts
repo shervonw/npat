@@ -38,13 +38,11 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
 
       channel.on("presence", { event: "leave" }, (presence) => {
         const exitedPlayer = presence.leftPresences[0];
-        console.log("exit", exitedPlayer);
+        // console.log("exit", exitedPlayer);
         setLastLeftPlayer(exitedPlayer);
       });
 
       channel.on("broadcast", { event: "start" }, ({ payload }) => {
-        console.log({payload})
-
         if (payload) {
           setAppContext({ type: "categories", value: payload.categories });
           setAppContext({ type: "maxRounds", value: payload.maxRounds });
