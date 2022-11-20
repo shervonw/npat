@@ -43,6 +43,8 @@ const appContextReducer: AppContextReducer = (state, action) => {
         true,
         state
       );
+    case "scoringPartners":
+      return assoc("scoringPartners", action.value, state);
     default:
       return state;
   }
@@ -56,6 +58,7 @@ const [useAppContext, AppContextProvider] =
     possibleAlphabet: ALPHABET,
     ready: {},
     responses: {},
+    scoringPartners: {},
   });
 
 export { useAppContext, AppContextProvider };

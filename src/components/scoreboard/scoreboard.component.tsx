@@ -2,7 +2,6 @@ import { all, equals, pipe, pluck } from "ramda";
 import React, { useCallback, useMemo } from "react";
 import { StateComponentType } from "../../app.types";
 import { ScoreTable, usePlayersWithScore } from "../score-table";
-import { sortByScore } from "../score-table/score-table.utils";
 import styles from "./scoreboard.module.css";
 
 export const Scoreboard: StateComponentType = ({ context, players }) => {
@@ -13,15 +12,20 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const staticPlayers = useMemo(() => playersWithScore, []);
 
+  const currentPlayerWithScores = useMemo(
+    () => staticPlayers[position],
+    [position, staticPlayers]
+  );
+
   // TODO: Fix when score are tied. Ensure they have correct positioning
   const winner = useMemo(() => {
     const allEqual = pipe(
-      pluck("score"),
-      all(equals(staticPlayers[0].score))
+      pluck("place"),
+      all(equals(staticPlayers[0].place))
     )(staticPlayers);
 
     if (!allEqual) {
-      return staticPlayers[0].userId;
+      return staticPlayers[0];
     }
   }, [staticPlayers]);
 
@@ -33,7 +37,7 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
     <div className={styles.container}>
       <h1>Final Scores</h1>
       <h2>
-        {winner === userId ? (
+        {winner.userId === userId ? (
           <>
             <span>⭐</span>
             <span>
@@ -52,17 +56,13 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
         ) : (
           <>
             <span></span>
-            <span>You placed #{position + 1}</span>
+            <span>You placed #{currentPlayerWithScores.place}</span>
             <span></span>
           </>
         )}
       </h2>
 
-      <ScoreTable
-        players={staticPlayers}
-        position={position}
-        showPosition={Boolean(winner)}
-      />
+      <ScoreTable players={staticPlayers} position={position} />
 
       <div className={styles.buttonWrapper}>
         <button onClick={resetGame}>New Game</button>

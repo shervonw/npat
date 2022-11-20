@@ -1,10 +1,7 @@
 import { omit } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppContext } from "./app.context";
-import {
-  StateComponentProps,
-  StateContext
-} from "./app.types";
+import { StateComponentProps, StateContext } from "./app.types";
 import { useChannel } from "./hooks/channel.hook";
 
 export const useAppChannel = ({ context, send }: StateComponentProps) => {
@@ -16,9 +13,9 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
 
   const channel = useMemo(() => {
     if (context.roomCode && context.userId) {
-      return getChannel(context.roomCode, context.userId)
+      return getChannel(context.roomCode, context.userId);
     }
-  }, [context.roomCode, context.userId, getChannel])
+  }, [context.roomCode, context.userId, getChannel]);
 
   const updatePlayers = useCallback((newPlayers: StateContext[]) => {
     setPlayers(newPlayers);
@@ -31,7 +28,7 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
         const players = Object.values(presenceState).map(
           (player) => player[0]
         ) as unknown as StateContext[];
-  
+
         updatePlayers(players);
       });
 
@@ -55,21 +52,28 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
         setAppContext({
           type: "allResponses",
           value: payload,
-        })
+        });
+      });
+
+      channel.on("broadcast", { event: "scoringPartners" }, ({ payload }) => {
+        setAppContext({
+          type: "scoringPartners",
+          value: payload,
+        });
       });
 
       channel.on("broadcast", { event: "score" }, ({ payload }) => {
         setAppContext({
           type: "allScores",
           value: payload,
-        })
+        });
       });
 
       channel.on("broadcast", { event: "ready" }, ({ payload }) => {
         setAppContext({
           type: "ready",
           value: payload,
-        })
+        });
       });
 
       channel.subscribe((status) => {

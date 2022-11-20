@@ -1,19 +1,14 @@
-import { useMemo } from "react";
 import { StateContext } from "../../app.types";
-import { usePlayersWithScore } from "./players-with-scores.hook";
 import styles from "./score-table.module.css";
-import { sortByScore } from "./score-table.utils";
 
 interface ScoreTableProps {
   players: StateContext[];
   position: number;
-  showPosition?: boolean;
 }
 
 export const ScoreTable: React.FC<ScoreTableProps> = ({
-  position,
   players,
-  showPosition = true,
+  position,
 }) => {
   return (
     <div className={styles.scoreTable}>
@@ -31,7 +26,7 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
         return (
           <div key={index} className={scoreboardItemStyles}>
             <div className={styles.position}>
-              {showPosition ? `${index + 1}.` : "-"}
+              {player.place}
             </div>
             <div className={styles.name}>{player.name}</div>
             <div className={styles.finalScore}>{player.score}</div>

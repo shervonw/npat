@@ -16,6 +16,7 @@ export interface Game {
   possibleAlphabet: string[];
   ready: Record<number, Record<string, boolean>>;
   responses: Record<number, any>;
+  scoringPartners: Record<string, string>;
 }
 
 export interface StateContext {

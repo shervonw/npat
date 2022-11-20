@@ -25,7 +25,7 @@ export const transformReponses = (
     toPairs,
     sortUserList(playerIdToScore),
     map(([userId, responses]) => ({
-      user: playersIndexByUserId[userId],
+      user: playersIndexByUserId?.[userId],
       responses,
     })),
   )(allResponses)

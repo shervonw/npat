@@ -20,19 +20,17 @@ export const Score: StateComponentType = ({
   const { round, userId = "" } = context;
   const delay = useDelay();
 
-  const { allResponses, categories = [] } = appContext;
+  const { allResponses, categories = [], scoringPartners } = appContext;
 
   const userResponseForRound = useMemo(() => {
     return allResponses[round]?.[userId];
   }, [allResponses, round, userId]);
 
   const { loading } = useAsync(async () => {
-    await delay(1000);
-  }, []);
+    if (channel && userResponseForRound) {
+      await delay(1000);
 
-  useEffect(() => {
-    if (!loading && channel && userResponseForRound) {
-      channel.send({
+      await channel.send({
         type: "broadcast",
         event: "responses",
         payload: {
@@ -41,15 +39,27 @@ export const Score: StateComponentType = ({
           values: userResponseForRound,
         },
       });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel, loading, userResponseForRound]);
 
-  const scoringPartners = useMemo(() => {
-    return generateScoringPartners(
-      players.map((player) => player?.userId ?? "")
-    );
-  }, [players]);
+      await delay(1000);
+
+      if (context.leader) {
+        const newScoringPartner = generateScoringPartners(
+          players.map((player) => player?.userId ?? "")
+        );
+
+        await channel.send({
+          type: "broadcast",
+          event: "scoringPartners",
+          payload: newScoringPartner,
+        });
+
+        setAppContext({
+          type: "scoringPartners",
+          value: newScoringPartner,
+        });
+      }
+    }
+  }, [channel, userResponseForRound]);
 
   const [currentScore, setCurrentScore] = useState<Record<string, number>>({});
 
@@ -94,19 +104,28 @@ export const Score: StateComponentType = ({
   useEffect(() => {
     const playerToScoreResponses = allResponsesForRound[playerIdToScore];
 
-    if (isEmpty(currentScore) && playerToScoreResponses) {
-      const initialScores = Object.entries(playerToScoreResponses).reduce((scores, [category]) => {
-        const isSimilar = similarityCheck(playerIdToScore)(category);
+    if (!loading && isEmpty(currentScore) && playerToScoreResponses) {
+      const initialScores = Object.entries(playerToScoreResponses).reduce(
+        (scores, [category]) => {
+          const isSimilar = similarityCheck(playerIdToScore)(category);
 
-        return {
-          ...scores,
-          [category]: isSimilar ? 5 : 0,
-        }
-      }, {});
+          return {
+            ...scores,
+            [category]: isSimilar ? 5 : 0,
+          };
+        },
+        {}
+      );
 
       setCurrentScore(initialScores);
     }
-  }, [allResponsesForRound, currentScore, playerIdToScore, similarityCheck]);
+  }, [
+    allResponsesForRound,
+    currentScore,
+    loading,
+    playerIdToScore,
+    similarityCheck,
+  ]);
 
   const onReadyClick = useCallback(async () => {
     if (channel) {
@@ -119,7 +138,7 @@ export const Score: StateComponentType = ({
         round: context.round,
         score: totalScore,
         userId: playerIdToScore,
-      }
+      };
 
       await channel.send({
         type: "broadcast",
@@ -134,7 +153,14 @@ export const Score: StateComponentType = ({
 
       send({ type: "submitScores" });
     }
-  }, [channel, context.round, currentScore, playerIdToScore, send, setAppContext]);
+  }, [
+    channel,
+    context.round,
+    currentScore,
+    playerIdToScore,
+    send,
+    setAppContext,
+  ]);
 
   if (loading) {
     return <div>Submit Responses...</div>;
@@ -148,7 +174,7 @@ export const Score: StateComponentType = ({
         <span>- means duplicate answer</span>
       </div>
       {responseList.map(({ user, responses }, userIndex) => {
-        const currentUserId = user.userId ?? "";
+        const currentUserId = user?.userId ?? "";
         const isScoring = currentUserId === playerIdToScore;
         const similarCheckFn = similarityCheck(currentUserId);
 
