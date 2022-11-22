@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { useAppMachine } from "../src/app-machine.hook";
 import { useAppChannel } from "../src/app.hook";
-import { useWakeLock } from "../src/wake-lock.hook";
+import { useWakeLock } from "../src/hooks/wake-lock.hook";
 import styles from "../styles/app.module.css";
 
 const Index: NextPage<{ code: string }> = ({ code }) => {
