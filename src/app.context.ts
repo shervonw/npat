@@ -1,4 +1,4 @@
-import { assoc, assocPath, mergeRight } from "ramda";
+import { assoc, assocPath } from "ramda";
 import { createReducerContext } from "react-use";
 import { Game } from "./app.types";
 import { ALPHABET } from "./components/create-game/create-game.constants";

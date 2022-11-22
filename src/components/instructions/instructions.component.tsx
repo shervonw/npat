@@ -1,9 +1,6 @@
-import React from "react";
+import { StateComponentType } from "../../app.types";
 
-export const Instructions: React.FC<{
-  context: any;
-  send: (event: any) => void;
-}> = (props) => {
+export const Instructions: StateComponentType = (props) => {
   return (
     <div>
       <h2>How To Play</h2>

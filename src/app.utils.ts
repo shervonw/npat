@@ -1,9 +1,4 @@
 import { zipObj } from "ramda";
-import {
-  adjectives,
-  animals,
-  uniqueNamesGenerator,
-} from "unique-names-generator";
 import { EMOJIS } from "./constants";
 
 type GetRandomNumberFn = (input?: { min?: number; max?: number }) => number;

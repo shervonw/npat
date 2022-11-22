@@ -1,4 +1,4 @@
-import { createMachine, State } from "xstate";
+import { createMachine } from "xstate";
 import { createModel } from "xstate/lib/model";
 import { StateContext, StateEventObject } from "./app.types";
 
