@@ -25,14 +25,11 @@ export const JoinGame: StateComponentType = ({ channel, context, send }) => {
       const { roomCode, user } = formData;
       const newPlayer = createPlayer(user);
 
-      if (channel) {
-        setAppContext({ type: "player", value: newPlayer });
-        await channel.track(newPlayer);
-      }
+      setAppContext({ type: "player", value: newPlayer });
 
       send({ type: "ready", value: roomCode });
     },
-    [channel, send, setAppContext]
+    [send, setAppContext]
   );
 
   return (
