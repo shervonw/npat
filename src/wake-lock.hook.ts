@@ -9,4 +9,18 @@ export const useWakeLock = () => {
       setWakeLock(new NoSleep());
     }
   }, [wakeLock]);
+
+  useEffect(() => {
+    if (wakeLock) {
+      window.addEventListener(
+        "click",
+        () => {
+          if (!wakeLock.isEnabled) {
+            wakeLock.enable(); // Enable wake lock.
+          }
+        },
+        false
+      );
+    }
+  }, [wakeLock]);
 }
