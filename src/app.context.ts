@@ -6,59 +6,55 @@ import { ALPHABET } from "./components/create-game/create-game.constants";
 type AppContextReducer = (
   state: Game,
   action: {
-    type: keyof Game | "maxRounds" | "newLetter";
+    type: keyof Game | "reset";
     value?: any;
   }
 ) => Game;
 
+const DEFAULT_CONTEXT = {
+  allResponses: {},
+  allScores: {},
+  categories: [],
+  currentLetter: "",
+  maxRounds: 5,
+  possibleAlphabet: ALPHABET,
+  ready: {},
+  scoringPartners: {},
+};
+
 const appContextReducer: AppContextReducer = (state, action) => {
   switch (action.type) {
     case "categories":
-      return assoc("categories", action.value, state);
+    case "currentLetter":
     case "maxRounds":
-      return assoc("maxRounds", action.value, state);
-    case "newLetter":
-      return mergeRight(state, action.value);
-    case "responses":
-      return assocPath(
-        ["responses", action.value.round],
-        action.value.values,
-        state
-      );
+    case "player":
+    case "possibleAlphabet":
+      return assoc(action.type, action.value, state);
     case "allResponses":
-      return assocPath(
+      return assocPath<any, Game>(
         ["allResponses", action.value.round, action.value.userId],
-        action.value.values,
-        state
-      );
+        action.value.values
+      )(state);
     case "allScores":
-      return assocPath(
+      return assocPath<number, Game>(
         ["allScores", action.value.round, action.value.userId],
-        action.value.score,
-        state
-      );
+        action.value.score
+      )(state);
     case "ready":
-      return assocPath(
+      return assocPath<boolean, Game>(
         ["ready", action.value.round, action.value.userId],
-        true,
-        state
-      );
+        true
+      )(state);
     case "scoringPartners":
       return assoc("scoringPartners", action.value, state);
+    case "reset":
+      return DEFAULT_CONTEXT;
     default:
       return state;
   }
 };
 
 const [useAppContext, AppContextProvider] =
-  createReducerContext<AppContextReducer>(appContextReducer, {
-    allResponses: {},
-    allScores: {},
-    categories: [],
-    possibleAlphabet: ALPHABET,
-    ready: {},
-    responses: {},
-    scoringPartners: {},
-  });
+  createReducerContext<AppContextReducer>(appContextReducer, DEFAULT_CONTEXT);
 
 export { useAppContext, AppContextProvider };

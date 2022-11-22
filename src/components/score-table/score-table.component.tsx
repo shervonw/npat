@@ -1,8 +1,8 @@
-import { StateContext } from "../../app.types";
+import { Player } from "../../app.types";
 import styles from "./score-table.module.css";
 
 interface ScoreTableProps {
-  players: StateContext[];
+  players: Player[];
   position: number;
 }
 

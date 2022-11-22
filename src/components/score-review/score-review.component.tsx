@@ -12,9 +12,11 @@ export const ScoreReview: StateComponentType = ({
   players,
   send,
 }) => {
-  const { round, userId = "" } = context;
   const [appContext, setAppContext] = useAppContext();
   const delay = useDelay();
+
+  const { player } = appContext;
+  const { round } = context;
 
   const { loading } = useAsync(async () => {
     await delay(1000);
@@ -23,7 +25,7 @@ export const ScoreReview: StateComponentType = ({
   useEffect(() => {
     if (!loading && channel) {
       const payload = {
-        userId,
+        userId: player?.userId,
         round,
       };
 
@@ -61,7 +63,7 @@ export const ScoreReview: StateComponentType = ({
     send({ type: "start" });
   }, [channel, send]);
 
-  const { playersWithScore, position } = usePlayersWithScore(userId, players);  
+  const { playersWithScore, position } = usePlayersWithScore(player?.userId ?? "", players);  
 
   if (loading) {
     return <div>Submitting scores...</div>;
@@ -72,7 +74,7 @@ export const ScoreReview: StateComponentType = ({
       <h1>Current Leaderboard</h1>
 
       <h3>
-        {allReady && !context.leader
+        {allReady && !player?.leader
           ? "Waiting for admin to start the next round..."
           : "Waiting for all players to finish scoring..."}
       </h3>
@@ -80,7 +82,7 @@ export const ScoreReview: StateComponentType = ({
       <ScoreTable players={playersWithScore} position={position} />
 
       <div className={styles.buttonWrapper}>
-        {context.leader && allReady && (
+        {player?.leader && allReady && (
           <button onClick={startGame}>Start Next Round</button>
         )}
       </div>

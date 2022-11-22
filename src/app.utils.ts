@@ -7,7 +7,7 @@ import {
 import { EMOJIS } from "./constants";
 
 type GetRandomNumberFn = (input?: { min?: number; max?: number }) => number;
-const getRandomNumber: GetRandomNumberFn = ({ min = 0, max = 99 } = {}) =>
+export const getRandomNumber: GetRandomNumberFn = ({ min = 0, max = 99 } = {}) =>
   Math.floor(Math.random() * (max - min) + min);
 
 export const getEmoji = (excludeList: any[] = []) => {
@@ -25,13 +25,6 @@ export const createPlayer = (name: string, leader: boolean = false) => ({
   leader,
   emoji: getEmoji(),
 });
-
-const uniqueRoomName = uniqueNamesGenerator({
-  dictionaries: [adjectives, animals],
-  separator: "-",
-});
-
-export const generateRoomName = () => `${uniqueRoomName}-${getRandomNumber()}`;
 
 const doesAnyPairCollide = (list1: string[], list2: string[]) => {
   for (let i = 0; i <= list1.length - 1; i++) {
@@ -67,15 +60,3 @@ export const generateScoringPartners = (users: string[]) => {
   };
 };
 
-export const getLetterFromAlphabet = (alphabet: string[]) => {
-  const alphabetCopy = alphabet.slice();
-
-  alphabetCopy.sort(() => 0.5 - Math.random());
-
-  const letter = alphabetCopy.shift();
-
-  return {
-    currentLetter: letter,
-    possibleAlphabet: alphabetCopy,
-  };
-};

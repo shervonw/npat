@@ -1,19 +1,20 @@
-import { assign, createMachine } from "xstate";
-import { StateContext } from "./app.types";
-import { createPlayer, generateRoomName } from "./app.utils";
+import { createMachine, State } from "xstate";
+import { createModel } from "xstate/lib/model";
+import { StateContext, StateEventObject } from "./app.types";
 
-const DEFAULT_CONTEXT = {
+const appModel = createModel<StateContext, StateEventObject>({
   maxRounds: 5,
+  roomCode: "",
   round: 0,
-};
+});
 
-export const appStateMachine = createMachine<StateContext>(
+export const appStateMachine = createMachine(
   {
     preserveActionOrder: true,
     predictableActionArguments: true,
     id: "npat-game",
     initial: "initial",
-    context: DEFAULT_CONTEXT,
+    context: appModel.initialContext,
     states: {
       initial: {
         always: [
@@ -25,7 +26,6 @@ export const appStateMachine = createMachine<StateContext>(
         id: "Home",
         states: {
           index: {
-            entry: ["resetContext"],
             on: {
               instructions: { target: "instructions" },
               create: { target: "create" },
@@ -42,12 +42,7 @@ export const appStateMachine = createMachine<StateContext>(
               back: { target: "index" },
               ready: {
                 target: "#Game.waitingRoom",
-              },
-              createPlayer: {
-                actions: ["createPlayer"],
-              },
-              updateRoomCode: {
-                actions: ["updateRoomCode"],
+                actions: ["assignRoomCode"],
               },
             },
           },
@@ -56,16 +51,7 @@ export const appStateMachine = createMachine<StateContext>(
               back: { target: "index" },
               ready: {
                 target: "#Game.waitingRoom",
-                actions: ["createRoomCode"],
-              },
-              updateCategories: {
-                actions: ["updateCategories"],
-              },
-              updateMaxRounds: {
-                actions: ["updateMaxRounds"],
-              },
-              createPlayer: {
-                actions: ["createLeader"],
+                actions: ["assignRoomCode"],
               },
             },
           },
@@ -73,6 +59,11 @@ export const appStateMachine = createMachine<StateContext>(
       },
       game: {
         id: "Game",
+        on: {
+          updateMaxRounds: {
+            actions: ["updateMaxRounds"],
+          },
+        },
         states: {
           waitingRoom: {
             on: {
@@ -98,7 +89,6 @@ export const appStateMachine = createMachine<StateContext>(
             },
           },
           scoreReview: {
-            entry: ["readyUp"],
             on: {
               start: {
                 target: "playing",
@@ -107,7 +97,12 @@ export const appStateMachine = createMachine<StateContext>(
             },
           },
           scoreboard: {
-            exit: assign({ maxRounds: 5, rounds: 0 }),
+            on: {
+              home: {
+                target: "#Home.index",
+              },
+            },
+            exit: ["reset"],
           },
         },
       },
@@ -115,34 +110,20 @@ export const appStateMachine = createMachine<StateContext>(
   },
   {
     actions: {
-      createRoomCode: assign({
-        roomCode: (c, e) => generateRoomName(),
+      assignRoomCode: appModel.assign({
+        roomCode: (_, event) => event.value,
       }),
-      updateRoomCode: assign({
-        roomCode: (_, e) => e.value,
-      }),
-      assignRoomCode: assign({
-        roomCode: (_, e) => e.value,
-      }),
-      incrementRounds: assign({
+      incrementRounds: appModel.assign({
         round: (context, _) => context.round + 1,
       }),
-      updateMaxRounds: assign({
-        maxRounds: (c, e) => e.value,
-      }),
-      createLeader: assign((_, e) => createPlayer(e.value, true)),
-      createPlayer: assign((_, e) => createPlayer(e.value)),
-      resetContext: assign(() => DEFAULT_CONTEXT),
-      readyUp: assign({
-        ready: (context, e) => ({
-          ...context.ready,
-          [context.round]: true,
-        }),
+      reset: appModel.reset(),
+      updateMaxRounds: appModel.assign({
+        maxRounds: (_, event) => event.value,
       }),
     },
     guards: {
-      checkForRoomCode: (ctx) => !!ctx.roomCode,
-      isAllRoundsCompleted: (ctx) => ctx.round > ctx.maxRounds,
+      checkForRoomCode: (context) => Boolean(context.roomCode),
+      isAllRoundsCompleted: (context) => context.round > context.maxRounds,
     },
   }
 );

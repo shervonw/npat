@@ -11,6 +11,9 @@ export const WaitingRoom: StateComponentType = ({
   players,
 }) => {
   const [copyTimeout, setCopyTimeout] = useState<number>(0);
+  const [appContext] = useAppContext();
+
+  const { player } = appContext;
 
   useTimeoutFn(() => {
     setCopyTimeout(0);
@@ -52,7 +55,7 @@ export const WaitingRoom: StateComponentType = ({
       </div>
 
       <div className={styles.buttonWrapper}>
-        {context.leader ? (
+        {player?.leader ? (
           <button onClick={startGame}>Start Game</button>
         ) : (
           <p>Waiting for the leader to begin the game...</p>

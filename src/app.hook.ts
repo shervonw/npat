@@ -1,23 +1,24 @@
-import { omit } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppContext } from "./app.context";
-import { StateComponentProps, StateContext } from "./app.types";
+import { Player, StateComponentProps } from "./app.types";
 import { useChannel } from "./hooks/channel.hook";
 
 export const useAppChannel = ({ context, send }: StateComponentProps) => {
   const getChannel = useChannel();
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
-  const [players, setPlayers] = useState<StateContext[]>([]);
-  const [lastLeftPlayer, setLastLeftPlayer] = useState<any>(null);
-  const [, setAppContext] = useAppContext();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [lastLeftPlayer, setLastLeftPlayer] = useState<Player>();
+  const [appContext, setAppContext] = useAppContext();
+
+  const { player, } = appContext;
 
   const channel = useMemo(() => {
-    if (context.roomCode && context.userId) {
-      return getChannel(context.roomCode, context.userId);
+    if (context.roomCode && player?.userId) {
+      return getChannel(context.roomCode, player?.userId);
     }
-  }, [context.roomCode, context.userId, getChannel]);
+  }, [context.roomCode, getChannel, player?.userId]);
 
-  const updatePlayers = useCallback((newPlayers: StateContext[]) => {
+  const updatePlayers = useCallback((newPlayers: Player[]) => {
     setPlayers(newPlayers);
   }, []);
 
@@ -27,22 +28,28 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
         const presenceState = channel.presenceState();
         const players = Object.values(presenceState).map(
           (player) => player[0]
-        ) as unknown as StateContext[];
+        ) as unknown as Player[];
 
         updatePlayers(players);
       });
 
       channel.on("presence", { event: "leave" }, (presence) => {
-        const exitedPlayer = presence.leftPresences[0];
+        const exitedPlayer = presence.leftPresences[0] as unknown as Player;
         // console.log("exit", exitedPlayer);
         setLastLeftPlayer(exitedPlayer);
       });
 
       channel.on("broadcast", { event: "start" }, ({ payload }) => {
-        if (payload) {
+        if (payload.categories) {
           setAppContext({ type: "categories", value: payload.categories });
+        }
+        if (payload.maxRounds) {
           setAppContext({ type: "maxRounds", value: payload.maxRounds });
-          setAppContext({ type: "newLetter", value: payload.letter });
+          send({ type: "updateMaxRounds", value: payload.maxRounds });
+        }
+        if (payload.newLetter) {
+          setAppContext({ type: "currentLetter", value: payload.currentLetter });
+          setAppContext({ type: "possibleAlphabet", value: payload.possibleAlphabet });
         }
 
         send({ type: "start" });
@@ -78,7 +85,7 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
 
       channel.subscribe((status) => {
         setIsSubscribed(status === "SUBSCRIBED");
-        channel.track(omit(["roomCode", "round"], context));
+        channel.track(player || {});
       });
     }
 

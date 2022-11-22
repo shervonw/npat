@@ -1,12 +1,11 @@
-import { pick } from "ramda";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
-import { StateComponentType } from "../../app.types";
-import { getLetterFromAlphabet } from "../../app.utils";
+import { Game, StateComponentType } from "../../app.types";
 import { useDelay } from "../../hooks/delay.hook";
 import { useTimer } from "../../hooks/timer.hook";
+import { getLetterFromAlphabet } from "../create-game/create-game.utils";
 import styles from "./input-list.module.css";
 
 export const InputList: StateComponentType = ({
@@ -17,7 +16,8 @@ export const InputList: StateComponentType = ({
 }) => {
   const delay = useDelay();
   const [appContext, setAppContext] = useAppContext();
-  const { categories, currentLetter } = appContext;
+  const { categories, currentLetter, maxRounds, player, possibleAlphabet } =
+    appContext;
 
   const { isRunning: isTimerRunning, seconds, startTimer } = useTimer();
   const { register, getValues } = useForm<any>({
@@ -34,20 +34,28 @@ export const InputList: StateComponentType = ({
   const { loading } = useAsync(async () => {
     await delay();
 
-    if (channel && context.leader) {
+    if (channel && player?.leader) {
+      const letter = getLetterFromAlphabet(possibleAlphabet);
+      let payload: Partial<Game> = letter;
 
-      const letter = getLetterFromAlphabet(appContext.possibleAlphabet);
-
-      setAppContext({ type: "newLetter", value: letter });
+      if (context.round === 0) {
+        payload.categories = categories;
+        payload.maxRounds = maxRounds;
+      }
 
       await channel.send({
         type: "broadcast",
         event: "start",
-        payload: {
-          ...pick(["categories", "maxRounds"], appContext),
-          letter,
-        },
+        payload,
       });
+
+      setAppContext({ type: "currentLetter", value: letter.currentLetter });
+      setAppContext({
+        type: "possibleAlphabet",
+        value: letter.possibleAlphabet,
+      });
+
+      send({ type: "updateMaxRounds", value: maxRounds });
     }
   }, []);
 
@@ -58,7 +66,7 @@ export const InputList: StateComponentType = ({
           type: "allResponses",
           value: {
             round: context.round,
-            userId: context.userId,
+            userId: player?.userId,
             values: getValues(),
           },
         });
@@ -80,17 +88,17 @@ export const InputList: StateComponentType = ({
         type: "allResponses",
         value: {
           round: context.round,
-          userId: context.userId,
+          userId: player?.userId,
           values: getValues(),
         },
       });
 
       send({ type: "submitResponses" });
     }
-  }, [channel, context.round, context.userId, getValues, send, setAppContext]);
+  }, [channel, context.round, getValues, player?.userId, send, setAppContext]);
 
   useEffect(() => {
-    if (context.leader && seconds === 0) {
+    if (player?.leader && seconds === 0) {
       onSubmitHanlder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

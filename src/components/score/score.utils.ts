@@ -1,5 +1,5 @@
 import { indexBy, map, pipe, prop, toPairs } from "ramda";
-import { StateContext } from "../../app.types";
+import { Player } from "../../app.types";
 
 export const sortUserList = (scoringId: string) => (allResponses: [string, any][]) => {
   const index = allResponses.findIndex(([userId]) => userId === scoringId);
@@ -17,7 +17,7 @@ export const sortUserList = (scoringId: string) => (allResponses: [string, any][
 export const transformReponses = (
   allResponses: Record<string, any> = {},
   playerIdToScore: string,
-  players: StateContext[],
+  players: Player[],
 ) => {
   const playersIndexByUserId = indexBy(prop("userId"), players);
 

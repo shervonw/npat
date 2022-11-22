@@ -1,10 +1,10 @@
-import { StateContext } from "../../app.types";
+import { Player } from "../../app.types";
 import styles from "./user-list.module.css";
 
 export const UserList = ({
   players,
 }: {
-  players: StateContext[];
+  players: Player[];
 }) => {
   return (
     <div className={styles.userList}>

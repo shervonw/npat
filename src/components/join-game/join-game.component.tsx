@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
+import { createPlayer } from "../../app.utils";
 import styles from "./join-game.module.css";
 
 type FormData = {
@@ -8,7 +10,8 @@ type FormData = {
   user: string;
 };
 
-export const JoinGame: StateComponentType = ({ context, send }) => {
+export const JoinGame: StateComponentType = ({ channel, context, send }) => {
+  const [, setAppContext] = useAppContext();
   const { handleSubmit, register } = useForm<FormData>({
     mode: "onSubmit",
     defaultValues: {
@@ -19,11 +22,17 @@ export const JoinGame: StateComponentType = ({ context, send }) => {
 
   const onSubmitHanlder = useCallback(
     async (formData: FormData) => {
-      send({ type: "updateRoomCode", value: formData.roomCode });
-      send({ type: "createPlayer", value: formData.user });
-      send({ type: "ready" });
+      const { roomCode, user } = formData;
+      const newPlayer = createPlayer(user);
+
+      if (channel) {
+        setAppContext({ type: "player", value: newPlayer });
+        await channel.track(newPlayer);
+      }
+
+      send({ type: "ready", value: roomCode });
     },
-    [send]
+    [channel, send, setAppContext]
   );
 
   return (

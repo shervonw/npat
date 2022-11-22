@@ -1,13 +1,16 @@
-import { all, equals, pipe, pluck } from "ramda";
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
 import { ScoreTable, usePlayersWithScore } from "../score-table";
 import styles from "./scoreboard.module.css";
 
-export const Scoreboard: StateComponentType = ({ context, players }) => {
-  const { userId = "" } = context;
-
-  const { playersWithScore, position } = usePlayersWithScore(userId, players);
+export const Scoreboard: StateComponentType = ({ players, send }) => {
+  const [appContext, setAppContext] = useAppContext();
+  const { player } = appContext;
+  const { playersWithScore, position } = usePlayersWithScore(
+    player?.userId ?? "",
+    players
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const staticPlayers = useMemo(() => playersWithScore, []);
@@ -17,27 +20,17 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
     [position, staticPlayers]
   );
 
-  // TODO: Fix when score are tied. Ensure they have correct positioning
-  const winner = useMemo(() => {
-    const allEqual = pipe(
-      pluck("place"),
-      all(equals(staticPlayers[0].place))
-    )(staticPlayers);
-
-    if (!allEqual) {
-      return staticPlayers[0];
-    }
-  }, [staticPlayers]);
-
   const resetGame = useCallback(() => {
-    location.reload();
-  }, []);
+    setAppContext({ type: "reset" });
+    send({ type: "home" });
+  }, [send, setAppContext]);
 
   return (
     <div className={styles.container}>
       <h1>Final Scores</h1>
       <h2>
-        {winner.userId === userId ? (
+        {currentPlayerWithScores.place === 1 &&
+        !currentPlayerWithScores.tied ? (
           <>
             <span>⭐</span>
             <span>
@@ -47,11 +40,11 @@ export const Scoreboard: StateComponentType = ({ context, players }) => {
             </span>
             <span>🏆</span>
           </>
-        ) : winner === undefined ? (
+        ) : currentPlayerWithScores.tied ? (
           <>
             <span></span>
-            <span>It&apos;s a tie 👔</span>
-            <span></span>
+            <span>You tied for #{currentPlayerWithScores.place}</span>
+            <span>👔</span>
           </>
         ) : (
           <>

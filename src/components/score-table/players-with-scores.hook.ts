@@ -1,11 +1,17 @@
-import { adjust, assoc } from "ramda";
+import { adjust, assoc, mergeLeft, mergeRight, pipe } from "ramda";
 import { useMemo } from "react";
 import { useAppContext } from "../../app.context";
-import { StateContext } from "../../app.types";
+import { Player } from "../../app.types";
+
+interface PlayerWithScore extends Player {
+  place: number;
+  score: number;
+  tied: boolean;
+}
 
 export const usePlayersWithScore = (
   currentUserId: string,
-  players: StateContext[]
+  players: Player[]
 ) => {
   const [appContext] = useAppContext();
 
@@ -29,7 +35,7 @@ export const usePlayersWithScore = (
   );
 
   const playersWithScore = useMemo(() => {
-    const sortedPlayers = players
+    const sortedPlayers: PlayerWithScore[] = players
       .map((player: any) => ({
         ...player,
         score: playerScoreMap[player.userId ?? ""] ?? 0,
@@ -43,15 +49,35 @@ export const usePlayersWithScore = (
 
       const prevPlayer = allPlayers[index - 1];
 
-      return prevPlayer.score === player.score
-          ? adjust(index, assoc("place", prevPlayer.place), allPlayers)
-          : adjust(index, assoc("place", index + 1), allPlayers);
+      if (prevPlayer.score === player.score) {
+        return pipe(
+          adjust<PlayerWithScore>(
+            index,
+            mergeLeft({
+              place: prevPlayer.place,
+              tied: true,
+            })
+          ),
+          adjust<PlayerWithScore>(index - 1, assoc("tied", true))
+        )(allPlayers);
+      }
+
+      return adjust<PlayerWithScore>(
+        index,
+        mergeLeft({
+          place: index + 1,
+          tied: false,
+        }),
+        allPlayers
+      );
     }, sortedPlayers);
   }, [playerScoreMap, players]);
 
   const position = useMemo(
     () =>
-      playersWithScore.findIndex((player: any) => player.userId === currentUserId),
+      playersWithScore.findIndex(
+        (player: any) => player.userId === currentUserId
+      ),
     [currentUserId, playersWithScore]
   );
 

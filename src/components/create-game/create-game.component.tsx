@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
+import { createPlayer } from "../../app.utils";
 import {
   CATEGORIES,
   DEFAULT_CATEGORIES,
@@ -9,6 +10,7 @@ import {
   ROUND_SELECTIONS,
 } from "../../constants";
 import styles from "./create-game.module.css";
+import { generateRoomName } from "./create-game.utils";
 
 type FormValues = {
   categories: Array<string>;
@@ -16,7 +18,7 @@ type FormValues = {
   user: string;
 };
 
-export const CreateGame: StateComponentType = ({ context, send }) => {
+export const CreateGame: StateComponentType = ({ channel, context, send }) => {
   const [, setAppContext] = useAppContext();
   const { handleSubmit, register } = useForm<FormValues>({
     mode: "onSubmit",
@@ -29,14 +31,14 @@ export const CreateGame: StateComponentType = ({ context, send }) => {
   const onSubmitHanlder = useCallback(
     async (formData: FormValues) => {
       const { categories, rounds, user } = formData;
-
-      send({ type: "createPlayer", value: user });
-      send({ type: "updateMaxRounds", value: parseInt(rounds) });
+      const newPlayer = createPlayer(user, true);
+      const newRoomCode = generateRoomName();
 
       setAppContext({ type: "categories", value: categories });
-      setAppContext({ type: "maxRounds", value: rounds });
+      setAppContext({ type: "maxRounds", value: parseInt(rounds) });
+      setAppContext({ type: "player", value: newPlayer });
 
-      send({ type: "ready" });
+      send({ type: "ready", value: newRoomCode });
     },
     [send, setAppContext]
   );

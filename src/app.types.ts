@@ -1,8 +1,8 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { EventObject } from "xstate";
 
-interface User {
-  id: string;
+export interface Player {
+  userId: string;
   name: string;
   leader: boolean;
   emoji: string;
@@ -13,24 +13,17 @@ export interface Game {
   allScores: Record<number, Record<string, number>>;
   categories: string[];
   currentLetter?: string;
+  maxRounds: number;
+  player?: Player;
   possibleAlphabet: string[];
   ready: Record<number, Record<string, boolean>>;
-  responses: Record<number, any>;
   scoringPartners: Record<string, string>;
 }
 
 export interface StateContext {
-  emoji?: string;
-  leader?: boolean;
   maxRounds: number;
-  name?: string;
-  roomCode?: string;
+  roomCode: string;
   round: number;
-  userId?: string;
-  ready?: Record<number, boolean>;
-  responses?: Record<number, any>;
-  scores?: Record<number, any>;
-  totalScore?: number;
 }
 
 export interface StateEventObject extends EventObject {
@@ -45,5 +38,5 @@ export interface StateComponentProps {
 export type StateComponentType = React.FC<StateComponentProps & {
   channel?: RealtimeChannel;
   isSubscribed?: boolean;
-  players: StateContext[];
+  players: Player[];
 }>;
