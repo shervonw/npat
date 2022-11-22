@@ -17,10 +17,11 @@ export const Score: StateComponentType = ({
   send,
 }) => {
   const [appContext, setAppContext] = useAppContext();
-  const { round, userId = "" } = context;
   const delay = useDelay();
 
-  const { allResponses, categories = [], scoringPartners } = appContext;
+  const { round } = context;
+  const { allResponses, categories = [], player, scoringPartners } = appContext;
+  const userId = useMemo(() => player?.userId ?? "", [player]);
 
   const userResponseForRound = useMemo(() => {
     return allResponses[round]?.[userId];
@@ -42,7 +43,7 @@ export const Score: StateComponentType = ({
 
       await delay(1000);
 
-      if (context.leader) {
+      if (player?.leader) {
         const newScoringPartner = generateScoringPartners(
           players.map((player) => player?.userId ?? "")
         );
@@ -182,9 +183,9 @@ export const Score: StateComponentType = ({
           <>
             <div key={userIndex} className={styles.card}>
               <ScoreCardHeader
-                isCurrentUser={context.userId === currentUserId}
+                isCurrentUser={userId === currentUserId}
                 isScoring={isScoring}
-                name={user.name || ""}
+                name={user?.name ?? ""}
               />
               <div className={styles.scoreLayout}>
                 {categories.map((category) => {

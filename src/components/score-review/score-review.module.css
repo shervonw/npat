@@ -2,7 +2,8 @@
   margin-top: 0;
 }
 
-.container > h1 {
+.container > h1,
+.container > h3 {
   text-align: center;
 }
 

@@ -1,11 +1,18 @@
-.heading,
-.roomCodeContainer {
+.container > h1,
+.container > h2,
+.container > p {
+  margin: 0;
   text-align: center;
-  margin-bottom: 0;
+}
+.container > h1 > span,
+.highlight {
+  color: dodgerblue;
 }
 
 .roomCodeContainer {
   padding: 2rem 0;
+  text-align: center;
+  margin-bottom: 0;
 }
 
 .roomCodeContainer p {
@@ -36,11 +43,6 @@
   margin-bottom: 2rem;
 }
 
-.buttonWrapper > button,
-.buttonWrapper > p {
-  margin: 0 auto 1rem;
-}
-
-.buttonWrapper > p {
-  width: fit-content;
+.buttonWrapper > button {
+  margin: 1.5rem auto;
 }

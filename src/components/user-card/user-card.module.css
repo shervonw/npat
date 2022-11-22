@@ -1,24 +1,19 @@
-.userList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-}
-
-.userList > div {
+.userCard {
   position: relative;
   max-width: 7rem;
   min-width: 3rem;
   text-align: center;
+  margin: auto;
 }
-.userList > div > span {
+.userCard > span {
   position: absolute;
   top: 0;
-  right: -1.25rem;
+  right: 0;
 }
 
 .emoji {
-  height: 4rem;
-  font-size: 3rem;
+  height: 6rem;
+  font-size: 5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -28,10 +23,10 @@
   margin-top: 0.5rem !important;
 }
 
-.userList > div > p {
+.userCard > p {
   margin: 0;
   overflow-wrap: break-word;
-  font-size: 1.125rem;
+  font-size: 2rem;
 }
 
 .leaderIndicator {

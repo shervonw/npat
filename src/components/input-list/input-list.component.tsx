@@ -38,7 +38,7 @@ export const InputList: StateComponentType = ({
       const letter = getLetterFromAlphabet(possibleAlphabet);
       let payload: Partial<Game> = letter;
 
-      if (context.round === 0) {
+      if (context.round === 1) {
         payload.categories = categories;
         payload.maxRounds = maxRounds;
       }

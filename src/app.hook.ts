@@ -40,15 +40,17 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
       });
 
       channel.on("broadcast", { event: "start" }, ({ payload }) => {
-        if (payload.categories) {
+        if (payload?.categories) {
           setAppContext({ type: "categories", value: payload.categories });
         }
-        if (payload.maxRounds) {
+        if (payload?.maxRounds) {
           setAppContext({ type: "maxRounds", value: payload.maxRounds });
           send({ type: "updateMaxRounds", value: payload.maxRounds });
         }
-        if (payload.newLetter) {
+        if (payload?.currentLetter) {
           setAppContext({ type: "currentLetter", value: payload.currentLetter });
+        }
+        if (payload?.possibleAlphabet) {
           setAppContext({ type: "possibleAlphabet", value: payload.possibleAlphabet });
         }
 

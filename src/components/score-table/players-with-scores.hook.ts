@@ -5,13 +5,15 @@ import { Player } from "../../app.types";
 
 interface PlayerWithScore extends Player {
   place: number;
+  ready: boolean;
   score: number;
   tied: boolean;
 }
 
 export const usePlayersWithScore = (
   currentUserId: string,
-  players: Player[]
+  players: Player[],
+  round: number,
 ) => {
   const [appContext] = useAppContext();
 
@@ -38,6 +40,7 @@ export const usePlayersWithScore = (
     const sortedPlayers: PlayerWithScore[] = players
       .map((player: any) => ({
         ...player,
+        ready: appContext.ready?.[round]?.[player.userId ?? ""] ?? false,
         score: playerScoreMap[player.userId ?? ""] ?? 0,
       }))
       .sort((a, b) => b.score - a.score);
@@ -71,7 +74,7 @@ export const usePlayersWithScore = (
         allPlayers
       );
     }, sortedPlayers);
-  }, [playerScoreMap, players]);
+  }, [appContext.ready, playerScoreMap, players, round]);
 
   const position = useMemo(
     () =>

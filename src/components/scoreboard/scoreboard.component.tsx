@@ -4,12 +4,13 @@ import { StateComponentType } from "../../app.types";
 import { ScoreTable, usePlayersWithScore } from "../score-table";
 import styles from "./scoreboard.module.css";
 
-export const Scoreboard: StateComponentType = ({ players, send }) => {
+export const Scoreboard: StateComponentType = ({ context, players, send }) => {
   const [appContext, setAppContext] = useAppContext();
   const { player } = appContext;
   const { playersWithScore, position } = usePlayersWithScore(
     player?.userId ?? "",
-    players
+    players,
+    context.round,
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,10 +1,17 @@
 import { Player } from "../../app.types";
 import styles from "./user-list.module.css";
 
-export const UserList = ({
+interface PlayerWithScore extends Player {
+  ready?: boolean;
+  score?: number;
+}
+
+interface UserListProps {
+  players: PlayerWithScore[];
+}
+
+export const UserList: React.FC<UserListProps> = ({
   players,
-}: {
-  players: Player[];
 }) => {
   return (
     <div className={styles.userList}>
@@ -15,6 +22,8 @@ export const UserList = ({
             <p>
               {player.leader && <span>👑</span>} {player.name}
             </p>
+            {player.score !== undefined && <p>{player.score}</p>}
+            {player.ready && <span>✅</span>}
           </div>
         ))}
     </div>

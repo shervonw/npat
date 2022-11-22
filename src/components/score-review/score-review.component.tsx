@@ -3,7 +3,9 @@ import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
 import { useDelay } from "../../hooks/delay.hook";
-import { ScoreTable, usePlayersWithScore } from "../score-table";
+import { usePlayersWithScore } from "../score-table";
+import { UserCard } from "../user-card";
+import { UserList } from "../user-list";
 import styles from "./score-review.module.css";
 
 export const ScoreReview: StateComponentType = ({
@@ -63,7 +65,25 @@ export const ScoreReview: StateComponentType = ({
     send({ type: "start" });
   }, [channel, send]);
 
-  const { playersWithScore, position } = usePlayersWithScore(player?.userId ?? "", players);  
+  const { playersWithScore } = usePlayersWithScore(
+    player?.userId ?? "",
+    players,
+    round,
+  );
+
+  const isPlayerReady = useMemo(() => {
+    return appContext.ready?.[round]?.[player?.userId ?? ""] ?? false;
+  }, [appContext.ready, player?.userId, round]);
+
+  const playerWithScore = useMemo(
+    () => playersWithScore.find((p) => player?.userId === p.userId),
+    [player?.userId, playersWithScore]
+  );
+
+  const otherPlayers = useMemo(
+    () => playersWithScore.filter((p) => player?.userId !== p.userId),
+    [player?.userId, playersWithScore]
+  );
 
   if (loading) {
     return <div>Submitting scores...</div>;
@@ -79,7 +99,13 @@ export const ScoreReview: StateComponentType = ({
           : "Waiting for all players to finish scoring..."}
       </h3>
 
-      <ScoreTable players={playersWithScore} position={position} />
+      {playerWithScore && <UserCard player={playerWithScore} />}
+
+      {otherPlayers.length > 0 && (
+        <div className={styles.userListContainer}>
+          <UserList players={otherPlayers} />
+        </div>
+      )}
 
       <div className={styles.buttonWrapper}>
         {player?.leader && allReady && (

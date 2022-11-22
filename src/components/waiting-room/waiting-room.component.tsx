@@ -1,19 +1,21 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTimeoutFn } from "react-use";
 import { useAppContext } from "../../app.context";
 import { StateComponentType } from "../../app.types";
+import { UserCard } from "../user-card";
 import { UserList } from "../user-list";
 import styles from "./waiting-room.module.css";
 
-export const WaitingRoom: StateComponentType = ({
-  context,
-  send,
-  players,
-}) => {
+export const WaitingRoom: StateComponentType = ({ context, players, send }) => {
   const [copyTimeout, setCopyTimeout] = useState<number>(0);
   const [appContext] = useAppContext();
 
   const { player } = appContext;
+
+  const otherPlayers = useMemo(
+    () => players.filter((p) => player?.userId !== p.userId),
+    [player?.userId, players]
+  );
 
   useTimeoutFn(() => {
     setCopyTimeout(0);
@@ -31,8 +33,12 @@ export const WaitingRoom: StateComponentType = ({
   }, [send]);
 
   return (
-    <div>
-      <h1 className={styles.heading}>Welcome to the Lobby</h1>
+    <div className={styles.container}>
+      <h1>
+        Welcome <span>{player?.name}!</span>
+      </h1>
+      <h2 className={styles.heading}>You are in the lobby</h2>
+
       <div className={styles.roomCodeContainer}>
         <p>Your room code is:</p>
 
@@ -49,17 +55,22 @@ export const WaitingRoom: StateComponentType = ({
         <p>Click &quot;Copy Link&quot; button to copy room link to share!</p>
       </div>
 
-      <div className={styles.userListContainer}>
-        <h2>Players in the room</h2>
-        <UserList players={players} />
-      </div>
+      <h2 className={player?.leader ? styles.highlight : ""}>
+        {player?.leader
+          ? "You are the room leader"
+          : "Waiting for the leader to begin the game..."}
+      </h2>
+      {player && <UserCard player={player} />}
+
+      {otherPlayers.length > 0 && (
+        <div className={styles.userListContainer}>
+          <h2>Players in the room</h2>
+          <UserList players={otherPlayers} />
+        </div>
+      )}
 
       <div className={styles.buttonWrapper}>
-        {player?.leader ? (
-          <button onClick={startGame}>Start Game</button>
-        ) : (
-          <p>Waiting for the leader to begin the game...</p>
-        )}
+        {player?.leader && <button onClick={startGame}>Start Game</button>}
       </div>
     </div>
   );
