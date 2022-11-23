@@ -28,7 +28,7 @@ export const ScoreTable: React.FC<ScoreTableProps> = ({
             <div className={styles.position}>
               {player.place}
             </div>
-            <div className={styles.name}>{player.name}</div>
+            <div className={styles.name}>{player.emoji} {player.name}</div>
             <div className={styles.finalScore}>{player.score}</div>
           </div>
         );

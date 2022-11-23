@@ -6,7 +6,7 @@ import { UserCard } from "../user-card";
 import { UserList } from "../user-list";
 import styles from "./waiting-room.module.css";
 
-export const WaitingRoom: StateComponentType = ({ context, players, send }) => {
+export const WaitingRoom: StateComponentType = ({ channel, context, players, send }) => {
   const [copyTimeout, setCopyTimeout] = useState<number>(0);
   const [appContext] = useAppContext();
 
@@ -28,9 +28,16 @@ export const WaitingRoom: StateComponentType = ({ context, players, send }) => {
     setCopyTimeout(4000);
   }, [context.roomCode]);
 
-  const startGame = useCallback(() => {
+  const startGame = useCallback(async () => {
+    if (channel) {
+      await channel.send({
+        type: "broadcast",
+        event: "start",
+      });
+    }
+
     send({ type: "start" });
-  }, [send]);
+  }, [channel, send]);
 
   return (
     <div className={styles.container}>

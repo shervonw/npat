@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { useInterval } from "react-use";
+import { useBoolean, useInterval } from "react-use";
 
 const TIMER_VALUE = 60;
 const DELAY_VALUE = 1000;
 
 const SOUND_SRC = {
-  timer: '/assets/audio/tick-tock.mp3',
-  ending: '/assets/audio/fast-tick-tock.mp3',
-}
+  timer: "/assets/audio/tick-tock.mp3",
+  ending: "/assets/audio/fast-tick-tock.mp3",
+};
 
 export const useTimer = () => {
   const [seconds, setSeconds] = useState(TIMER_VALUE);
@@ -15,15 +15,16 @@ export const useTimer = () => {
   const [endingAudio] = useState(new Audio(SOUND_SRC.ending));
   const [isTimerSoundPlaying, setIsTimerSoundPlaying] = useState(false);
   const [isRunning, toggleIsRunning] = useState(false);
+  const [mute, toggleMute] = useBoolean(false);
 
   const stopAndResetTimer = useCallback(() => {
     setSeconds(TIMER_VALUE);
     toggleIsRunning(false);
-  }, [toggleIsRunning])
+  }, [toggleIsRunning]);
 
   const startTimer = useCallback(() => {
     toggleIsRunning(true);
-  }, [toggleIsRunning])
+  }, [toggleIsRunning]);
 
   useInterval(
     () => {
@@ -37,37 +38,47 @@ export const useTimer = () => {
   useEffect(() => {
     if (!isTimerSoundPlaying && isRunning) {
       timerAudio.loop = true;
-      timerAudio.play()
-      setIsTimerSoundPlaying(true)
+      timerAudio.play();
+      setIsTimerSoundPlaying(true);
     }
-    
+
     if (seconds === 4) {
-      timerAudio.pause()
+      timerAudio.pause();
     }
-  }, [isRunning, isTimerSoundPlaying, seconds, timerAudio])
+  }, [isRunning, isTimerSoundPlaying, seconds, timerAudio]);
 
   useEffect(() => {
-    if (seconds === 4) {
-      endingAudio.play()
+    if (seconds === 4 && !mute) {
+      endingAudio.play();
     }
-  }, [endingAudio, seconds])
+  }, [endingAudio, mute, seconds]);
+
+  useEffect(() => {
+    if (mute) {
+      timerAudio.pause();
+    } else {
+      timerAudio.play();
+    }
+  }, [mute, seconds, timerAudio])
 
   useEffect(() => {
     return () => {
       if (!timerAudio.paused) {
-        timerAudio.pause()
+        timerAudio.pause();
       }
 
       if (!endingAudio.paused) {
-        endingAudio.pause()
+        endingAudio.pause();
       }
-    }
-  }, [endingAudio, timerAudio])
+    };
+  }, [endingAudio, timerAudio]);
 
   return {
     isRunning,
+    mute,
     seconds,
     startTimer,
     stopAndResetTimer,
-  }
+    toggleMute,
+  };
 };

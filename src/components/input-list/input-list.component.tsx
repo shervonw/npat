@@ -19,7 +19,13 @@ export const InputList: StateComponentType = ({
   const { categories, currentLetter, maxRounds, player, possibleAlphabet } =
     appContext;
 
-  const { isRunning: isTimerRunning, seconds, startTimer } = useTimer();
+  const {
+    isRunning: isTimerRunning,
+    mute,
+    seconds,
+    startTimer,
+    toggleMute,
+  } = useTimer();
   const { register, getValues } = useForm<any>({
     mode: "onSubmit",
     defaultValues: (categories ?? []).reduce(
@@ -45,7 +51,7 @@ export const InputList: StateComponentType = ({
 
       await channel.send({
         type: "broadcast",
-        event: "start",
+        event: "game",
         payload,
       });
 
@@ -105,13 +111,13 @@ export const InputList: StateComponentType = ({
   }, [seconds]);
 
   useEffect(() => {
-    if (categories && currentLetter && !isTimerRunning) {
+    if (categories && currentLetter && !isTimerRunning && !loading) {
       startTimer();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categories, currentLetter, isTimerRunning]);
+  }, [categories, currentLetter, isTimerRunning, loading]);
 
-  if (loading) {
+  if (!currentLetter || loading) {
     return <div>Starting Round...</div>;
   }
 
@@ -130,7 +136,10 @@ export const InputList: StateComponentType = ({
           </h2>
         </div>
 
-        <p>{seconds}</p>
+        <div className={styles.rightContent}>
+          <p>{seconds}</p>
+          <button onClick={toggleMute}>{mute ? "Unmute" : "Mute"}</button>
+        </div>
       </div>
 
       {categories &&

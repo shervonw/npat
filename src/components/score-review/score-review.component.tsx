@@ -18,7 +18,7 @@ export const ScoreReview: StateComponentType = ({
   const delay = useDelay();
 
   const { player } = appContext;
-  const { round } = context;
+  const { maxRounds, round } = context;
 
   const { loading } = useAsync(async () => {
     await delay(1000);
@@ -40,6 +40,11 @@ export const ScoreReview: StateComponentType = ({
       setAppContext({
         type: "ready",
         value: payload,
+      });
+
+      setAppContext({
+        type: "currentLetter",
+        value: undefined,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,12 +73,8 @@ export const ScoreReview: StateComponentType = ({
   const { playersWithScore } = usePlayersWithScore(
     player?.userId ?? "",
     players,
-    round,
+    round
   );
-
-  const isPlayerReady = useMemo(() => {
-    return appContext.ready?.[round]?.[player?.userId ?? ""] ?? false;
-  }, [appContext.ready, player?.userId, round]);
 
   const playerWithScore = useMemo(
     () => playersWithScore.find((p) => player?.userId === p.userId),
@@ -84,6 +85,8 @@ export const ScoreReview: StateComponentType = ({
     () => playersWithScore.filter((p) => player?.userId !== p.userId),
     [player?.userId, playersWithScore]
   );
+
+  const isLastRound = useMemo(() => maxRounds === round, [maxRounds, round]);
 
   if (loading) {
     return <div>Submitting scores...</div>;
@@ -109,7 +112,7 @@ export const ScoreReview: StateComponentType = ({
 
       <div className={styles.buttonWrapper}>
         {player?.leader && allReady && (
-          <button onClick={startGame}>Start Next Round</button>
+          <button onClick={startGame}>{isLastRound ? "Go to scoreboard" : "Start Next Round"}</button>
         )}
       </div>
     </div>

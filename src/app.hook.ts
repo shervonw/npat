@@ -40,20 +40,6 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
       });
 
       channel.on("broadcast", { event: "start" }, ({ payload }) => {
-        if (payload?.categories) {
-          setAppContext({ type: "categories", value: payload.categories });
-        }
-        if (payload?.maxRounds) {
-          setAppContext({ type: "maxRounds", value: payload.maxRounds });
-          send({ type: "updateMaxRounds", value: payload.maxRounds });
-        }
-        if (payload?.currentLetter) {
-          setAppContext({ type: "currentLetter", value: payload.currentLetter });
-        }
-        if (payload?.possibleAlphabet) {
-          setAppContext({ type: "possibleAlphabet", value: payload.possibleAlphabet });
-        }
-
         send({ type: "start" });
       });
 
@@ -83,6 +69,22 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
           type: "ready",
           value: payload,
         });
+      });
+
+      channel.on("broadcast", { event: "game" }, ({ payload }) => {
+        if (payload?.categories) {
+          setAppContext({ type: "categories", value: payload.categories });
+        }
+        if (payload?.maxRounds) {
+          setAppContext({ type: "maxRounds", value: payload.maxRounds });
+          send({ type: "updateMaxRounds", value: payload.maxRounds });
+        }
+        if (payload?.currentLetter) {
+          setAppContext({ type: "currentLetter", value: payload.currentLetter });
+        }
+        if (payload?.possibleAlphabet) {
+          setAppContext({ type: "possibleAlphabet", value: payload.possibleAlphabet });
+        }
       });
 
       channel.subscribe((status) => {
