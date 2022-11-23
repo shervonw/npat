@@ -94,7 +94,7 @@ export const ScoreReview: StateComponentType = ({
 
   return (
     <div className={styles.container}>
-      <h1>Current Leaderboard</h1>
+      <h1>Current Scores</h1>
 
       <h3>
         {allReady && !player?.leader
