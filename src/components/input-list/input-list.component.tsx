@@ -46,7 +46,7 @@ export const InputList: StateComponentType = ({
     return countDown === 0;
   }, [countDown]);
 
-  const { loading } = useAsync(async () => {
+  useAsync(async () => {
     if (channel && player?.leader && isCountDownFinished) {
       const letter = getLetterFromAlphabet(possibleAlphabet);
       let payload: Partial<Game> = letter;
@@ -70,7 +70,7 @@ export const InputList: StateComponentType = ({
 
       send({ type: "updateMaxRounds", value: maxRounds });
     }
-  }, [countDown]);
+  }, [isCountDownFinished]);
 
   useEffect(() => {
     if (channel && isSubscribed) {
