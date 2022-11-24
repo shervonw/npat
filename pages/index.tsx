@@ -1,11 +1,12 @@
 import type { NextPage } from "next";
+import { useCallback, useEffect } from "react";
 import { useAppMachine } from "../src/app-machine.hook";
 import { useAppChannel } from "../src/app.hook";
 import { useWakeLock } from "../src/hooks/wake-lock.hook";
 import styles from "../styles/app.module.css";
 
 const Index: NextPage<{ code: string }> = ({ code }) => {
-  const { context, Component, send } = useAppMachine(code);
+  const { context, Component, send, stepAsString } = useAppMachine(code);
 
   useWakeLock();
 
@@ -13,6 +14,20 @@ const Index: NextPage<{ code: string }> = ({ code }) => {
     context,
     send,
   });
+
+  const beforeUnloadListener = useCallback((event: BeforeUnloadEvent) => {
+    if (stepAsString.includes("game")) {
+      return event.returnValue = true;
+    }
+  }, [stepAsString]);
+  
+  useEffect(() => {
+    addEventListener("beforeunload", beforeUnloadListener);
+
+    return () => {
+      removeEventListener("beforeunload", beforeUnloadListener);
+    }
+  }, [beforeUnloadListener])
 
   return (
     <div className={styles.container}>

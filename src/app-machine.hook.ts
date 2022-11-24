@@ -15,6 +15,7 @@ const convertStateValueToString = (value: StateValue): string => {
 
 interface UseWizardResult {
   step: StateValue;
+  stepAsString: string;
   context: StateContext;
   send: (event: EventObject) => void;
   Component?: StateComponentType;
@@ -32,6 +33,7 @@ export const useAppMachine = (code: string): UseWizardResult => {
       context: state.context,
       send,
       step: state.value,
+      stepAsString: convertStateValueToString(state.value),
       Component: componentsMap.get(convertStateValueToString(state.value))
     }),
     [send, state]
