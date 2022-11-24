@@ -54,12 +54,12 @@ export const useTimer = () => {
   }, [endingAudio, mute, seconds]);
 
   useEffect(() => {
-    if (mute) {
-      timerAudio.pause();
-    } else {
+    if (isRunning && !mute) {
       timerAudio.play();
+    } else {
+      timerAudio.pause();
     }
-  }, [mute, seconds, timerAudio])
+  }, [isRunning, mute, seconds, timerAudio])
 
   useEffect(() => {
     return () => {
