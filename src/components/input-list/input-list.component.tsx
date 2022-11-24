@@ -1,9 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAsync } from "react-use";
+import { useAsync, useInterval } from "react-use";
 import { useAppContext } from "../../app.context";
 import { Game, StateComponentType } from "../../app.types";
-import { useDelay } from "../../hooks/delay.hook";
 import { useTimer } from "../../hooks/timer.hook";
 import { getLetterFromAlphabet } from "../create-game/create-game.utils";
 import styles from "./input-list.module.css";
@@ -14,7 +13,7 @@ export const InputList: StateComponentType = ({
   isSubscribed,
   send,
 }) => {
-  const delay = useDelay();
+  const [countDown, setCountdown] = useState(5);
   const [appContext, setAppContext] = useAppContext();
   const { categories, currentLetter, maxRounds, player, possibleAlphabet } =
     appContext;
@@ -37,10 +36,18 @@ export const InputList: StateComponentType = ({
     ),
   });
 
-  const { loading } = useAsync(async () => {
-    await delay();
+  useInterval(() => {
+    if (countDown > 0) {
+      setCountdown(countDown - 1);
+    }
+  }, 1000);
 
-    if (channel && player?.leader) {
+  const isCountDownFinished = useMemo(() => {
+    return countDown === 0;
+  }, [countDown]);
+
+  const { loading } = useAsync(async () => {
+    if (channel && player?.leader && isCountDownFinished) {
       const letter = getLetterFromAlphabet(possibleAlphabet);
       let payload: Partial<Game> = letter;
 
@@ -63,7 +70,7 @@ export const InputList: StateComponentType = ({
 
       send({ type: "updateMaxRounds", value: maxRounds });
     }
-  }, []);
+  }, [countDown]);
 
   useEffect(() => {
     if (channel && isSubscribed) {
@@ -111,14 +118,19 @@ export const InputList: StateComponentType = ({
   }, [seconds]);
 
   useEffect(() => {
-    if (categories && currentLetter && !isTimerRunning && !loading) {
+    if (categories && currentLetter && !isTimerRunning && isCountDownFinished) {
       startTimer();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categories, currentLetter, isTimerRunning, loading]);
+  }, [categories, currentLetter, isCountDownFinished, isTimerRunning]);
 
-  if (!currentLetter || loading) {
-    return <div>Starting Round...</div>;
+  if (!currentLetter || countDown > 0) {
+    return (
+      <div className={styles.countdown}>
+        <h2>Starting round in...</h2>
+        <h1>{countDown}</h1>
+      </div>
+    );
   }
 
   return (
