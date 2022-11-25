@@ -5,31 +5,41 @@ export const Instructions: StateComponentType = (props) => {
     <div>
       <h2>How To Play</h2>
       <p>
-        The game is simple. The game creator sets the number of rounds and
-        chooses the word categories. The game is player over a couple of rounds.
-        At the beginning of every round, players get a new alphabet. Your job is
-        to think of words that begin with that letter and fit the categories in
-        the game. Each game round is timed at 60 seconds, but the game also end
-        as soon as the first person submits their response. Think fast!
+        The game creator will set the number of rounds and chooses the
+        categories.
+      </p>
+      <p>
+        At the start of each round, a unique letter from the alphabet will be
+        shown.
+      </p>
+      <p>
+        Now, you have think of a word for each category, starting with that
+        unique letter.
+      </p>
+      <p>Each round last 60 seconds, but there&apos;s a twist!</p>
+      <p>
+        The round can also end as soon as the first person submits their
+        responses.
       </p>
 
-      <h2>Creating A Game and Game Setup</h2>
+      <h2>Creating a Game</h2>
       <p>
-        Head on over to the &quot;Create New Game&quot; section on the previous
-        page to create a new game. You will be able to specify the number of
-        rounds you would like to play as well as any additional categories you
-        would want to include besides, &quot;Name&quot;, &quot;Place&quot;,
-        &quot;Animal&quot; and &quot;Thing&quot;. You can also define
-        &quot;scoring mechanics&quot;. Once you have created the game, you will get a
-        &quot;Game Code&quot;. Create the room and send the Game Code to your
-        friends who will be able to use it join the room. Once your friends have
-        joined, the creator will be able to start the game!
+        On the home page, clicking &quot;Create Game&quot; the button will take
+        you to the game setup page. There, you can set the number of rounds and
+        the categories.
+      </p>
+      <p>When you&apos;re finished click &quot;Create Game&quot;.</p>
+      <p>
+        You will be taken to the room lobby where you will be able to copy a
+        link with the room code that can be shared with your friends. Once your
+        friends have joined, as the creator, you will be able to start the game!
       </p>
 
-      <h2>Scoring Rules</h2>
+      <h2>Scoring</h2>
       <p>
-        Scoring Rules are simple: +10 points for each unique answer +5 points
-        for each non-unique answer +0 points for no answer
+        Scoring is simple: +10 points for each unique answer; +5 points for
+        common answers; +0 points for no answer or incomplete answer (incomplete
+        answers may be debated).
       </p>
 
       <button onClick={() => props.send({ type: "back" })}>Back</button>

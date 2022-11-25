@@ -10,8 +10,6 @@ export default function Document() {
           type="text/css"
         />
 
-        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-
         <meta
           name="description"
           content="Play Name, Place, Animal, Thing online with friends!"
@@ -28,7 +26,7 @@ export default function Document() {
         />
         <meta
           property="og:description"
-          content="Play 'Name, Place, Animal, Thing' online with friends! The iconic game has moved from our school notebooks to the online world. You can add additional categories besides name, place, animal and thing. Play with up to 10 of your friends online, from anywhere in the world!"
+          content="Play 'Name, Place, Animal, Thing' online with friends! This mind challenging childhood game has been recreated in the digital world. No more pen and paper, you can now play Name, Animal, Place, Thing online with your friends from anywhere."
         />
         <meta
           property="og:image"
@@ -45,7 +43,7 @@ export default function Document() {
         />
         <meta
           property="twitter:description"
-          content="Play 'Name, Place, Animal, Thing' online with friends! The iconic game has moved from our school notebooks to the online world. You can add additional categories besides name, place, animal and thing. Play with up to 10 of your friends online, from anywhere in the world!"
+          content="Play 'Name, Place, Animal, Thing' online with friends! This mind challenging childhood game has been recreated in the digital world. No more pen and paper, you can now play Name, Animal, Place, Thing online with your friends from anywhere."
         />
         <meta
           property="twitter:image"
