@@ -18,7 +18,8 @@ export const Scoreboard: StateComponentType = ({ context, players, send }) => {
 
   const currentPlayerWithScores = useMemo(
     () => staticPlayers[position],
-    [position, staticPlayers]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const resetGame = useCallback(() => {

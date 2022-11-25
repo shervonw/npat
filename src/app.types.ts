@@ -6,6 +6,7 @@ export interface Player {
   name: string;
   leader: boolean;
   emoji: string;
+  restoredOn: number;
 }
 
 export interface Game {
@@ -21,6 +22,7 @@ export interface Game {
 }
 
 export interface StateContext {
+  isRestoring: boolean;
   maxRounds: number;
   roomCode: string;
   round: number;

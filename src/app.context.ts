@@ -1,4 +1,4 @@
-import { assoc, assocPath } from "ramda";
+import { assoc, assocPath, mergeLeft, pipe } from "ramda";
 import { createReducerContext } from "react-use";
 import { Game } from "./app.types";
 import { ALPHABET } from "./components/create-game/create-game.constants";
@@ -6,7 +6,7 @@ import { ALPHABET } from "./components/create-game/create-game.constants";
 type AppContextReducer = (
   state: Game,
   action: {
-    type: keyof Game | "reset";
+    type: keyof Game | "assignAsLeader" | "reset" | "restore" | "scores";
     value?: any;
   }
 ) => Game;
@@ -30,6 +30,8 @@ const appContextReducer: AppContextReducer = (state, action) => {
     case "player":
     case "possibleAlphabet":
       return assoc(action.type, action.value, state);
+    case "assignAsLeader":
+      return assocPath(["player", "leader"], true, state);
     case "allResponses":
       return assocPath<any, Game>(
         ["allResponses", action.value.round, action.value.userId],
@@ -45,8 +47,17 @@ const appContextReducer: AppContextReducer = (state, action) => {
         ["ready", action.value.round, action.value.userId],
         true
       )(state);
+    case "scores":
+      return assoc("allScores", action.value)(state);
     case "scoringPartners":
       return assoc("scoringPartners", action.value, state);
+    case "restore":
+      const { round, ...restOfValue } = action.value;
+
+      return pipe(
+        assocPath<boolean, Game>(["player", "restoredOn"], round),
+        mergeLeft(restOfValue),
+      )(state);
     case "reset":
       return DEFAULT_CONTEXT;
     default:

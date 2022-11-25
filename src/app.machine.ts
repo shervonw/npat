@@ -3,6 +3,7 @@ import { createModel } from "xstate/lib/model";
 import { StateContext, StateEventObject } from "./app.types";
 
 const appModel = createModel<StateContext, StateEventObject>({
+  isRestoring: false,
   maxRounds: 5,
   roomCode: "",
   round: 0,
@@ -63,9 +64,16 @@ export const appStateMachine = createMachine(
           updateMaxRounds: {
             actions: ["updateMaxRounds"],
           },
+          setRound: {
+            actions: ["setRound"],
+          },
+          assignIsRestoringFlag: {
+            actions: ["assignIsRestoringFlag"]
+          },
         },
         states: {
           waitingRoom: {
+            always: [{ target: "scoreReview", cond: "isRestoring" }],
             on: {
               start: {
                 target: "playing",
@@ -89,6 +97,7 @@ export const appStateMachine = createMachine(
             },
           },
           scoreReview: {
+            entry: ["resetIsRestoringFlag"],
             on: {
               start: {
                 target: "playing",
@@ -116,14 +125,24 @@ export const appStateMachine = createMachine(
       incrementRounds: appModel.assign({
         round: (context, _) => context.round + 1,
       }),
+      setRound: appModel.assign({
+        round: (_, event) => event.value,
+      }),
       reset: appModel.reset(),
       updateMaxRounds: appModel.assign({
         maxRounds: (_, event) => event.value,
+      }),
+      resetIsRestoringFlag: appModel.assign({
+        isRestoring: (c, e) => false,
+      }),
+      assignIsRestoringFlag: appModel.assign({
+        isRestoring: (c, e) => true,
       }),
     },
     guards: {
       checkForRoomCode: (context) => Boolean(context.roomCode),
       isAllRoundsCompleted: (context) => context.round > context.maxRounds,
+      isRestoring: (context) => context.isRestoring,
     },
   }
 );

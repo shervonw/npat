@@ -1,9 +1,14 @@
 import { zipObj } from "ramda";
+import { integer, nativeMath } from "random-js";
 import { EMOJIS } from "./constants";
 
+console.log();
+
 type GetRandomNumberFn = (input?: { min?: number; max?: number }) => number;
-export const getRandomNumber: GetRandomNumberFn = ({ min = 0, max = 99 } = {}) =>
-  Math.floor(Math.random() * (max - min) + min);
+export const getRandomNumber: GetRandomNumberFn = ({
+  min = 0,
+  max = 99,
+} = {}) => integer(min, max)(nativeMath);
 
 export const getEmoji = (excludeList: any[] = []) => {
   const uniqueEmojiList = EMOJIS.filter(
@@ -14,12 +19,17 @@ export const getEmoji = (excludeList: any[] = []) => {
   return uniqueEmojiList[randomIndex];
 };
 
-export const createPlayer = (name: string, leader: boolean = false) => ({
-  userId: Math.floor(Math.random() * 100000000).toString(),
-  name,
-  leader,
-  emoji: getEmoji(),
-});
+export const createPlayer = (name: string, leader: boolean = false) => {
+  const userId = sessionStorage.getItem("userId") || integer(100000000, 999999999)(nativeMath).toString();
+
+  return {
+    userId,
+    name,
+    leader,
+    emoji: getEmoji(),
+  };
+};
+
 
 const doesAnyPairCollide = (list1: string[], list2: string[]) => {
   for (let i = 0; i <= list1.length - 1; i++) {
@@ -55,3 +65,11 @@ export const generateScoringPartners = (users: string[]) => {
   };
 };
 
+export const generateDefaultResponses = (categories: string[]) =>
+  categories.reduce(
+    (categoryObj, category) => ({
+      ...categoryObj,
+      [category]: "",
+    }),
+    {}
+  );

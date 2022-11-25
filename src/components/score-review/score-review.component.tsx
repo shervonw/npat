@@ -46,6 +46,11 @@ export const ScoreReview: StateComponentType = ({
         type: "currentLetter",
         value: undefined,
       });
+
+      setAppContext({
+        type: "scoringPartners",
+        value: undefined,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, loading]);

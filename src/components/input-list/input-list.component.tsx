@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useAsync, useInterval } from "react-use";
 import { useAppContext } from "../../app.context";
 import { Game, StateComponentType } from "../../app.types";
+import { generateDefaultResponses } from "../../app.utils";
 import { useTimer } from "../../hooks/timer.hook";
 import { getLetterFromAlphabet } from "../create-game/create-game.utils";
 import styles from "./input-list.module.css";
@@ -27,13 +28,7 @@ export const InputList: StateComponentType = ({
   } = useTimer();
   const { register, getValues } = useForm<any>({
     mode: "onSubmit",
-    defaultValues: (categories ?? []).reduce(
-      (categoryObj, category) => ({
-        ...categoryObj,
-        [category]: "",
-      }),
-      {}
-    ),
+    defaultValues: generateDefaultResponses(categories),
   });
 
   useInterval(() => {
@@ -50,11 +45,6 @@ export const InputList: StateComponentType = ({
     if (channel && player?.leader && isCountDownFinished) {
       const letter = getLetterFromAlphabet(possibleAlphabet);
       let payload: Partial<Game> = letter;
-
-      if (context.round === 1) {
-        payload.categories = categories;
-        payload.maxRounds = maxRounds;
-      }
 
       await channel.send({
         type: "broadcast",

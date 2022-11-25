@@ -1,8 +1,8 @@
-import { isEmpty } from "ramda";
+import { isEmpty, propEq, reject } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
-import { StateComponentType } from "../../app.types";
+import { Player, StateComponentType } from "../../app.types";
 import { generateScoringPartners } from "../../app.utils";
 import { useDelay } from "../../hooks/delay.hook";
 import { ScoreCardBody } from "./card-body";
@@ -74,8 +74,16 @@ export const Score: StateComponentType = ({
   );
 
   const responseList = useMemo(() => {
-    return transformReponses(allResponsesForRound, playerIdToScore, players);
-  }, [allResponsesForRound, playerIdToScore, players]);
+    const playersToScore = reject<Player>(
+      propEq("restoredOn", round)
+    )(players);
+
+    return transformReponses(
+      allResponsesForRound,
+      playerIdToScore,
+      playersToScore,
+    );
+  }, [allResponsesForRound, playerIdToScore, players, round]);
 
   const similarityCheck = useCallback(
     (userId: string) => (category: string) => {

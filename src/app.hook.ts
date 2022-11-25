@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useInterval } from "react-use";
 import { useAppContext } from "./app.context";
 import { Player, StateComponentProps } from "./app.types";
 import { useChannel } from "./hooks/channel.hook";
@@ -7,10 +8,11 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
   const getChannel = useChannel();
   const [isSubscribed, setIsSubscribed] = useState<boolean>();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [lastLeftPlayer, setLastLeftPlayer] = useState<Player>();
+  const [hasLeaderExited, setHasLeaderExited] = useState<boolean>();
+  const [newPlayer, setNewPlayer] = useState<Player>();
   const [appContext, setAppContext] = useAppContext();
 
-  const { player, } = appContext;
+  const { player } = appContext;
 
   const channel = useMemo(() => {
     if (context.roomCode && player?.userId) {
@@ -23,6 +25,12 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
   }, []);
 
   useEffect(() => {
+    if (player) {
+      sessionStorage.setItem("userId", player.userId);
+    }
+  }, [player]);
+
+  useEffect(() => {
     if (channel) {
       channel.on("presence", { event: "sync" }, () => {
         const presenceState = channel.presenceState();
@@ -33,13 +41,25 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
         updatePlayers(players);
       });
 
-      channel.on("presence", { event: "leave" }, (presence) => {
-        const exitedPlayer = presence.leftPresences[0] as unknown as Player;
-        // console.log("exit", exitedPlayer);
-        setLastLeftPlayer(exitedPlayer);
+      channel.on("presence", { event: "join" }, (presence) => {
+        const newPlayer = presence.newPresences[0] as unknown as Player;
+
+        if (newPlayer.leader) {
+          setHasLeaderExited(undefined);
+        } else {
+          setNewPlayer(newPlayer);
+        }
       });
 
-      channel.on("broadcast", { event: "start" }, ({ payload }) => {
+      channel.on("presence", { event: "leave" }, (presence) => {
+        const exitedPlayer = presence.leftPresences[0] as unknown as Player;
+
+        if (exitedPlayer.leader) {
+          setHasLeaderExited(true);
+        }
+      });
+
+      channel.on("broadcast", { event: "start" }, () => {
         send({ type: "start" });
       });
 
@@ -72,18 +92,36 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
       });
 
       channel.on("broadcast", { event: "game" }, ({ payload }) => {
-        if (payload?.categories) {
-          setAppContext({ type: "categories", value: payload.categories });
-        }
-        if (payload?.maxRounds) {
-          setAppContext({ type: "maxRounds", value: payload.maxRounds });
-          send({ type: "updateMaxRounds", value: payload.maxRounds });
-        }
         if (payload?.currentLetter) {
-          setAppContext({ type: "currentLetter", value: payload.currentLetter });
+          setAppContext({
+            type: "currentLetter",
+            value: payload.currentLetter,
+          });
         }
         if (payload?.possibleAlphabet) {
-          setAppContext({ type: "possibleAlphabet", value: payload.possibleAlphabet });
+          setAppContext({
+            type: "possibleAlphabet",
+            value: payload.possibleAlphabet,
+          });
+        }
+      });
+
+      channel.on("broadcast", { event: "join" }, ({ payload = {} }) => {
+        const { round, userId, ...restOfPayload } = payload;
+
+        if (userId === player?.userId) {
+          setAppContext({
+            type: "restore",
+            value: {
+              ...restOfPayload,
+              round,
+            },
+          })
+
+          if (round > 0) {
+            send({ type: "setRound", value: payload.round });
+            send({ type: "assignIsRestoringFlag" });
+          }
         }
       });
 
@@ -99,19 +137,54 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel]);
 
-  // useEffect(() => {
-  //   if (lastLeftPlayer && lastLeftPlayer?.leader) {
-  //     setLastLeftPlayer(null);
+  useInterval(
+    () => {
+      if (hasLeaderExited) {
+        const newLeader = players[0];
 
-  //     const newLeader = users?.[0];
+        if (newLeader.userId === player?.userId) {
+          setAppContext({ type: "assignAsLeader" });
+        }
+      }
 
-  //     if (newLeader?.userId === context.userId && channel) {
-  //       channel.track({ ...context, leader: true });
-  //       send({ type: "reAssignLeader" });
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [lastLeftPlayer]);
+      setHasLeaderExited(undefined);
+    },
+    hasLeaderExited ? 3000 : null
+  );
+
+  useEffect(() => {
+    if (channel && player?.leader) {
+      channel.track(player);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel, player?.leader]);
+
+  useInterval(
+    () => {
+      if (newPlayer) {
+        if (channel && player?.leader) {
+          const hasUserId =  Boolean(sessionStorage.getItem("userId") || "");
+  
+          channel.send({
+            type: "broadcast",
+            event: "join",
+            payload: {
+              userId: newPlayer.userId,
+              allScores: appContext.allScores,
+              categories: appContext.categories,
+              maxRounds: appContext.maxRounds,
+              possibleAlphabet: appContext.possibleAlphabet,
+              scoringPartners: appContext.scoringPartners,
+              round: hasUserId ? context.round : undefined,
+            },
+          });
+        }
+  
+        setNewPlayer(undefined);
+      }
+    },
+    newPlayer ? 1500 : null
+  );
 
   return {
     channel,
