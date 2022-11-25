@@ -25,6 +25,10 @@
   color: dodgerblue;
 }
 
+.currentLetter {
+  font-family: sans-serif;
+}
+
 .rightContent {
   display: flex;
   flex-direction: column;

@@ -144,7 +144,7 @@ export const InputList: StateComponentType = ({
             </span>
           </h2>
           <h2>
-            Current Letter: <span>{currentLetter}</span>
+            Current Letter: <span className={styles.currentLetter}>{currentLetter}</span>
           </h2>
         </div>
 
