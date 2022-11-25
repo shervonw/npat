@@ -1,4 +1,4 @@
-import { isEmpty, propEq, reject } from "ramda";
+import { isEmpty, map, pipe, propEq, reject } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAsync } from "react-use";
 import { useAppContext } from "../../app.context";
@@ -44,19 +44,23 @@ export const Score: StateComponentType = ({
       await delay(1000);
 
       if (player?.leader) {
-        const newScoringPartner = generateScoringPartners(
-          players.map((player) => player?.userId ?? "")
-        );
+        const newScoringPartners = pipe(
+          reject<Player>(
+            propEq("restoredOn", round)
+          ),
+          map((player) => player?.userId ?? ""),
+          generateScoringPartners
+        )(players);
 
         await channel.send({
           type: "broadcast",
           event: "scoringPartners",
-          payload: newScoringPartner,
+          payload: newScoringPartners,
         });
 
         setAppContext({
           type: "scoringPartners",
-          value: newScoringPartner,
+          value: newScoringPartners,
         });
       }
     }

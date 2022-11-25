@@ -2,8 +2,6 @@ import { zipObj } from "ramda";
 import { integer, nativeMath } from "random-js";
 import { EMOJIS } from "./constants";
 
-console.log();
-
 type GetRandomNumberFn = (input?: { min?: number; max?: number }) => number;
 export const getRandomNumber: GetRandomNumberFn = ({
   min = 0,

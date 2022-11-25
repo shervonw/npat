@@ -153,11 +153,11 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
   );
 
   useEffect(() => {
-    if (channel && player?.leader) {
+    if (channel && player) {
       channel.track(player);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel, player?.leader]);
+  }, [channel, player?.leader, player?.restoredOn]);
 
   useInterval(
     () => {
