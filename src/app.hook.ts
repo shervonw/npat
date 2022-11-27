@@ -116,7 +116,9 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
               ...restOfPayload,
               round,
             },
-          })
+          });
+
+          send({ type: "maxRounds", value: restOfPayload.maxRounds });
 
           if (round > 0) {
             send({ type: "setRound", value: payload.round });
@@ -156,15 +158,15 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
     if (channel && player) {
       channel.track(player);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channel, player?.leader, player?.restoredOn]);
 
   useInterval(
     () => {
       if (newPlayer) {
         if (channel && player?.leader) {
-          const hasUserId =  Boolean(sessionStorage.getItem("userId") || "");
-  
+          const hasUserId = Boolean(sessionStorage.getItem("userId") || "");
+
           channel.send({
             type: "broadcast",
             event: "join",
@@ -179,7 +181,7 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
             },
           });
         }
-  
+
         setNewPlayer(undefined);
       }
     },
