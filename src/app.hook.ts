@@ -118,7 +118,7 @@ export const useAppChannel = ({ context, send }: StateComponentProps) => {
             },
           });
 
-          send({ type: "maxRounds", value: restOfPayload.maxRounds });
+          send({ type: "updateMaxRounds", value: restOfPayload.maxRounds });
 
           if (round > 0) {
             send({ type: "setRound", value: payload.round });
