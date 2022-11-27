@@ -10,6 +10,9 @@ export const generateRoomName = () => `${uniqueRoomName}-${getRandomNumber()}`;
 
 export const getLetterFromAlphabet = (alphabet: string[]) => {
   const alphabetCopy = alphabet.slice();
+
+  alphabetCopy.sort(() => 0.5 - Math.random())
+
   const randIdx = getRandomNumber({ max: alphabet.length });
 
   const letter = alphabetCopy[randIdx];
